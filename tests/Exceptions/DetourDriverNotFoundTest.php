@@ -12,16 +12,12 @@ class DetourDriverNotFoundTest extends TestCase
 {
     protected function defineEnvironment($app): void
     {
-        // $app['config']->set('justbetter.statamic-detour.driver', null);
+        $app['config']->set('justbetter.statamic-detour.driver', null);
     }
 
     #[Test]
     public function it_can_throw_exceptions(): void
     {
-        // dd(config('justbetter.statamic-detour.driver'), config('statamic-detour.driver'));
-        // $this->expectException(DetourDriverNotFound::class);
-
-        // $provider = new ServiceProvider($this->app);
-        // $provider->boot();
+        $this->expectException(DetourDriverNotFound::class);
     }
 }

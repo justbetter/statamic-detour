@@ -32,8 +32,6 @@ class ServiceProvider extends AddonServiceProvider
     public function bootAddon(): void
     {
         $this->bootConfig()
-            ->bootRepository()
-            ->bootData()
             ->bootNavigation()
             ->bootMigrations();
     }
@@ -43,6 +41,8 @@ class ServiceProvider extends AddonServiceProvider
         parent::register();
 
         $this->registerConfig()
+            ->registerRepository()
+            ->registerData()
             ->registerMiddleware();
     }
 
@@ -72,7 +72,7 @@ class ServiceProvider extends AddonServiceProvider
         return $this;
     }
 
-    protected function bootData(): static
+    protected function registerData(): static
     {
         /** @var string $driver */
         $driver = config('justbetter.statamic-detour.driver');
@@ -84,7 +84,6 @@ class ServiceProvider extends AddonServiceProvider
         };
 
         if (! $data) {
-
             throw new DetourDriverNotFound('Invalid Detour driver: '.$driver);
         }
 
@@ -93,7 +92,7 @@ class ServiceProvider extends AddonServiceProvider
         return $this;
     }
 
-    protected function bootRepository(): static
+    protected function registerRepository(): static
     {
         /** @var string $driver */
         $driver = config('justbetter.statamic-detour.driver');
