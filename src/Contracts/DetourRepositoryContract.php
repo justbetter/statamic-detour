@@ -2,7 +2,7 @@
 
 namespace JustBetter\Detour\Contracts;
 
-use JustBetter\Detour\Data\Detour;
+use JustBetter\Detour\Contracts\DetourContract;
 
 interface DetourRepositoryContract
 {
@@ -11,9 +11,9 @@ interface DetourRepositoryContract
      */
     public function all(): array;
 
-    public function find(string $id): ?Detour;
+    public function find(string $id): ?DetourContract;
 
-    public function save(Detour $detour): void;
+    public function save(DetourContract $detour): void;
 
-    public function delete(Detour $detour): void;
+    public function delete(DetourContract $detour): void;
 }

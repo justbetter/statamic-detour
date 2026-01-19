@@ -4,7 +4,7 @@ namespace JustBetter\Detour\Repositories\File;
 
 use Illuminate\Support\Facades\File;
 use JustBetter\Detour\Contracts\DetourRepositoryContract;
-use JustBetter\Detour\Data\Detour;
+use JustBetter\Detour\Contracts\DetourContract;
 use Statamic\Facades\YAML;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -31,7 +31,7 @@ class DetourRepository implements DetourRepositoryContract
         return $detours;
     }
 
-    public function find(string $id): ?Detour
+    public function find(string $id): ?DetourContract
     {
         $file = $this->filePath($id);
         if (! File::exists($file)) {
@@ -39,15 +39,15 @@ class DetourRepository implements DetourRepositoryContract
         }
 
         $data = YAML::parse(File::get($file));
-
-        $detour = Detour::make($id);
+        $contract = app(DetourContract::class);
+        $detour = $contract::make($id);
 
         $detour->data($data);
 
         return $detour;
     }
 
-    public function save(Detour $detour): void
+    public function save(DetourContract $detour): void
     {
         $file = $this->filePath($detour->id());
 
@@ -55,7 +55,7 @@ class DetourRepository implements DetourRepositoryContract
         File::put($file, YAML::dump($detour->data()));
     }
 
-    public function delete(Detour $detour): void
+    public function delete(DetourContract $detour): void
     {
         $file = $this->filePath($detour->id());
 

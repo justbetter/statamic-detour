@@ -6,7 +6,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use JustBetter\Detour\Contracts\DetourRepositoryContract;
-use JustBetter\Detour\Data\Detour;
+use JustBetter\Detour\Contracts\DetourContract;
 use Statamic\Fields\Blueprint;
 use Statamic\Fields\BlueprintRepository;
 
@@ -47,12 +47,12 @@ class DetourController
         $fields = $blueprint->fields();
 
         $data = $request->all();
-
-        $detour = Detour::make();
+        $detourContract = app(DetourContract::class);
+        $detour = $detourContract::make();
         $fields = $fields->addValues($data);
         $fields->validate();
 
-        /** @var Detour $detour */
+        /** @var DetourContract $detour */
         $detour = $detour->data($fields->validate());
 
         $contract->save($detour);
@@ -62,7 +62,7 @@ class DetourController
 
     public function destroy(string $detour, DetourRepositoryContract $contract): void
     {
-        /** @var Detour $foundDetour */
+        /** @var DetourContract $foundDetour */
         $foundDetour = $contract->find($detour);
 
         $contract->delete($foundDetour);

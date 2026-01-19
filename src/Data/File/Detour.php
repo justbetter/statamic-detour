@@ -1,12 +1,13 @@
 <?php
 
-namespace JustBetter\Detour\Data;
+namespace JustBetter\Detour\Data\File;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use JsonSerializable;
+use JustBetter\Detour\Contracts\DetourContract;
 
-class Detour implements JsonSerializable
+class Detour implements JsonSerializable, DetourContract
 {
     protected string $id;
 
