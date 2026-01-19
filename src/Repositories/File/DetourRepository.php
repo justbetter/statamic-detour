@@ -3,12 +3,12 @@
 namespace JustBetter\Detour\Repositories\File;
 
 use Illuminate\Support\Facades\File;
-use JustBetter\Detour\Contracts\RedirectRepositoryContract;
-use JustBetter\Detour\Data\Redirect;
+use JustBetter\Detour\Contracts\DetourRepositoryContract;
+use JustBetter\Detour\Data\Detour;
 use Statamic\Facades\YAML;
 use Symfony\Component\Finder\SplFileInfo;
 
-class RedirectRepository implements RedirectRepositoryContract
+class DetourRepository implements DetourRepositoryContract
 {
     public function __construct(protected string $path)
     {
@@ -20,7 +20,7 @@ class RedirectRepository implements RedirectRepositoryContract
         /** @var array<int, Redirect> $redirects */
         $redirects = collect(File::allFiles($this->path))
             ->filter(fn (SplFileInfo $file): bool => str($file->getFilename())->endsWith('.yaml'))
-            ->map(function (SplFileInfo $file): ?Redirect {
+            ->map(function (SplFileInfo $file): ?Detour {
                 $id = pathinfo($file->getFilename(), PATHINFO_FILENAME);
 
                 return $this->find($id);
@@ -31,7 +31,7 @@ class RedirectRepository implements RedirectRepositoryContract
         return $redirects;
     }
 
-    public function find(string $id): ?Redirect
+    public function find(string $id): ?Detour
     {
         $file = $this->filePath($id);
 
@@ -41,14 +41,14 @@ class RedirectRepository implements RedirectRepositoryContract
 
         $data = YAML::parse(File::get($file));
 
-        $redirect = Redirect::make($id);
+        $redirect = Detour::make($id);
 
         $redirect->data($data);
 
         return $redirect;
     }
 
-    public function save(Redirect $redirect): void
+    public function save(Detour $redirect): void
     {
         $file = $this->filePath($redirect->id());
 
@@ -56,7 +56,7 @@ class RedirectRepository implements RedirectRepositoryContract
         File::put($file, YAML::dump($redirect->data()));
     }
 
-    public function delete(Redirect $redirect): void
+    public function delete(Detour $redirect): void
     {
         $file = $this->filePath($redirect->id());
 

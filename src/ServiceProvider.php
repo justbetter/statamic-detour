@@ -2,12 +2,17 @@
 
 namespace JustBetter\Detour;
 
-use JustBetter\Detour\Contracts\RedirectRepositoryContract;
-use JustBetter\Detour\Repositories\File\RedirectRepository;
+use JustBetter\Detour\Contracts\DetourRepositoryContract;
+use JustBetter\Detour\Repositories\File\DetourRepository;
 use Statamic\Providers\AddonServiceProvider;
 
 class ServiceProvider extends AddonServiceProvider
 {
+    protected $routes = [
+        'cp' => __DIR__ . '/../routes/cp.php',
+    ];
+
+
     public function bootAddon(): void
     {
         $this->bootConfig()
@@ -28,7 +33,7 @@ class ServiceProvider extends AddonServiceProvider
         if ($driver === 'file') {
             /** @var string $path */
             $path = config('justbetter.statamic-detour.path');
-            $this->app->bind(RedirectRepositoryContract::class, fn () => new RedirectRepository($path));
+            $this->app->bind(DetourRepositoryContract::class, fn () => new DetourRepository($path));
         }
 
         return $this;
