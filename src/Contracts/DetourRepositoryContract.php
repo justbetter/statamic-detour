@@ -2,12 +2,10 @@
 
 namespace JustBetter\Detour\Contracts;
 
-use JustBetter\Detour\Contracts\DetourContract;
-
 interface DetourRepositoryContract
 {
     /**
-     * @return array<int, Detour>
+     * @return array<string, DetourContract>
      */
     public function all(): array;
 

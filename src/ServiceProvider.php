@@ -2,13 +2,13 @@
 
 namespace JustBetter\Detour;
 
-use Exception;
 use JustBetter\Detour\Contracts\DetourContract;
 use JustBetter\Detour\Contracts\DetourRepositoryContract;
-use JustBetter\Detour\Exceptions\DetourDriverNotFound;
-use JustBetter\Detour\Repositories\File\DetourRepository as FileDetourRepository;
-use JustBetter\Detour\Repositories\Eloquent\DetourRepository as EloquentDetourRepository;
+use JustBetter\Detour\Data\Eloquent\Detour as EloquentDetour;
 use JustBetter\Detour\Data\File\Detour as FileDetour;
+use JustBetter\Detour\Exceptions\DetourDriverNotFound;
+use JustBetter\Detour\Repositories\Eloquent\DetourRepository as EloquentDetourRepository;
+use JustBetter\Detour\Repositories\File\DetourRepository as FileDetourRepository;
 use Statamic\Facades\CP\Nav;
 use Statamic\Providers\AddonServiceProvider;
 
@@ -64,32 +64,35 @@ class ServiceProvider extends AddonServiceProvider
             return $this;
         }
 
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
         return $this;
     }
 
     protected function bootData(): static
     {
+        /** @var string $driver */
         $driver = config('justbetter.statamic-detour.driver');
 
         $data = match ($driver) {
             'file' => FileDetour::class,
-            'eloquent' => EloquentDetourRepository::class,
+            'eloquent' => EloquentDetour::class,
             default => null,
         };
 
         if (! $data) {
-            throw new DetourDriverNotFound('Invalid Detour driver: ' . config('justbetter.statamic-detour.driver'));
+
+            throw new DetourDriverNotFound('Invalid Detour driver: '.$driver);
         }
 
-        $this->app->bind(DetourContract::class, fn() => new $data());
+        $this->app->bind(DetourContract::class, fn () => new $data);
 
         return $this;
     }
 
     protected function bootRepository(): static
     {
+        /** @var string $driver */
         $driver = config('justbetter.statamic-detour.driver');
 
         $repository = match ($driver) {
@@ -99,7 +102,7 @@ class ServiceProvider extends AddonServiceProvider
         };
 
         if (! $repository) {
-            throw new DetourDriverNotFound('Invalid Detour driver: '.config('justbetter.statamic-detour.driver'));
+            throw new DetourDriverNotFound('Invalid Detour driver: '.$driver);
         }
 
         /** @var string $path */

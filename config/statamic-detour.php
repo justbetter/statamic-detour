@@ -2,7 +2,7 @@
 
 return [
 
-    'driver' => 'file', // file|eloquent
+    'driver' => 'eloquent', // file|eloquent
 
     'path' => base_path('content/detours'),
 ];

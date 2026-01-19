@@ -5,8 +5,8 @@ namespace JustBetter\Detour\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use JustBetter\Detour\Contracts\DetourRepositoryContract;
 use JustBetter\Detour\Contracts\DetourContract;
+use JustBetter\Detour\Contracts\DetourRepositoryContract;
 use Statamic\Fields\Blueprint;
 use Statamic\Fields\BlueprintRepository;
 
@@ -47,6 +47,7 @@ class DetourController
         $fields = $blueprint->fields();
 
         $data = $request->all();
+
         $detourContract = app(DetourContract::class);
         $detour = $detourContract::make();
         $fields = $fields->addValues($data);

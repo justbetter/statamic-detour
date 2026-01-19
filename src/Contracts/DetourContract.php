@@ -8,9 +8,14 @@ interface DetourContract
 
     public static function make(?string $id = null): self;
 
+    /**
+     * @param  array<string, string | array<int, string>>  $data
+     * @return array<string, string | array<int, string>> | static
+     */
     public function data(?array $data = null): array|static;
 
-    public function get(string $key, $default = null): mixed;
-
+    /**
+     * @return array<string, string | array<int, string>>
+     */
     public function jsonSerialize(): array;
 }

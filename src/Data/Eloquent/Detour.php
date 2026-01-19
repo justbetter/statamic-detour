@@ -1,13 +1,16 @@
 <?php
 
-namespace JustBetter\Detour\Data\File;
+namespace JustBetter\Detour\Data\Eloquent;
 
 use Illuminate\Support\Str;
 use JsonSerializable;
 use JustBetter\Detour\Contracts\DetourContract;
+use JustBetter\Detour\Models\Detour as DetourModel;
 
 class Detour implements DetourContract, JsonSerializable
 {
+    protected ?DetourModel $model;
+
     protected string $id;
 
     /** @var array<string, string | array<int, string>> */
@@ -16,9 +19,24 @@ class Detour implements DetourContract, JsonSerializable
     public static function make(?string $id = null): self
     {
         $detour = new self;
-        $detour->id = $id ?: (string) Str::uuid();
+        $detour->id = $id ?: Str::uuid();
 
         return $detour;
+    }
+
+    public function model(?DetourModel $model = null): static|DetourModel
+    {
+        if (func_num_args() === 0 && $this->model) {
+            return $this->model;
+        }
+
+        $this->model = $model;
+
+        if (! is_null($model)) {
+            $this->id = $model->id;
+        }
+
+        return $this;
     }
 
     public function id(): string
@@ -26,10 +44,6 @@ class Detour implements DetourContract, JsonSerializable
         return $this->id;
     }
 
-    /**
-     * @param  array<string, string | array<int, string>>  $data
-     * @return array<string, string | array<int, string>> | static
-     */
     public function data(?array $data = null): array|static
     {
         if (func_num_args() === 0) {
@@ -41,6 +55,9 @@ class Detour implements DetourContract, JsonSerializable
         return $this;
     }
 
+    /**
+     * @return array<string, string | array<int, string>>
+     */
     public function jsonSerialize(): array
     {
         /** @var array<string, string | array<int, string>> $data */
