@@ -11,6 +11,8 @@ use JustBetter\Detour\Repositories\Eloquent\DetourRepository as EloquentDetourRe
 use JustBetter\Detour\Repositories\File\DetourRepository as FileDetourRepository;
 use Statamic\Facades\CP\Nav;
 use Statamic\Providers\AddonServiceProvider;
+use Illuminate\Routing\Router;
+use JustBetter\Detour\Http\Middleware\RedirectIfNeeded;
 
 class ServiceProvider extends AddonServiceProvider
 {
@@ -40,7 +42,8 @@ class ServiceProvider extends AddonServiceProvider
     {
         parent::register();
 
-        $this->registerConfig();
+        $this->registerConfig()
+            ->registerMiddleware();
     }
 
     protected function bootNavigation(): static
@@ -115,6 +118,20 @@ class ServiceProvider extends AddonServiceProvider
     protected function registerConfig(): static
     {
         $this->mergeConfigFrom(__DIR__.'/../config/statamic-detour.php', 'justbetter.statamic-detour');
+
+        return $this;
+    }
+
+    protected function registerMiddleware(): static
+    {
+        $this->app->booted(function () {
+            $router = app(Router::class);
+            if (config('justbetter.statamic-detour.mode') === 'performance') {
+                $router->pushMiddlewareToGroup('web', RedirectIfNeeded::class);
+            } else {
+                $router->prependMiddlewareToGroup('web', RedirectIfNeeded::class);
+            }
+        });
 
         return $this;
     }
