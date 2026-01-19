@@ -1,0 +1,82 @@
+title: Detour
+tabs:
+  main:
+    display: Main
+    sections:
+      -
+        fields:
+          -
+            handle: from
+            field:
+              type: text
+              display: From
+              localizable: false
+              width: 50
+              validate:
+                - required
+          -
+            handle: to
+            field:
+              type: text
+              display: To
+              localizable: false
+              width: 50
+              validate:
+                - required
+          -
+            handle: type
+            field:
+              options:
+                -
+                  key: path
+                  value: Path
+                -
+                  key: regex
+                  value: Regex
+              max_items: 1
+              default: path
+              type: select
+              display: Type
+              localizable: false
+              width: 50
+              validate:
+                - required
+          -
+            handle: code
+            field:
+              options:
+                -
+                  key: 301
+                  value: '301'
+                -
+                  key: 302
+                  value: '302'
+                -
+                  key: 307
+                  value: '307'
+                -
+                  key: 308
+                  value: '308'
+              max_items: 1
+              default: '302'
+              type: select
+              display: Code
+              localizable: false
+              width: 50
+              validate:
+                - required
+          -
+            handle: sites
+            field:
+              mode: select
+              type: sites
+              display: Sites
+              instructions: 'Can be left empty to add the detour for all sites.'
+              icon: sites
+              localizable: false
+              listable: hidden
+              instructions_position: above
+              visibility: visible
+              replicator_preview: true
+              hide_display: false
+              width: 50

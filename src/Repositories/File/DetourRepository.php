@@ -17,48 +17,47 @@ class DetourRepository implements DetourRepositoryContract
 
     public function all(): array
     {
-        /** @var array<int, Redirect> $redirects */
-        $redirects = collect(File::allFiles($this->path))
+        /** @var array<int, Detour> $detours */
+        $detours = collect(File::allFiles($this->path))
             ->filter(fn (SplFileInfo $file): bool => str($file->getFilename())->endsWith('.yaml'))
-            ->map(function (SplFileInfo $file): ?Detour {
+            ->mapWithKeys(function (SplFileInfo $file): array {
                 $id = pathinfo($file->getFilename(), PATHINFO_FILENAME);
 
-                return $this->find($id);
+                return [$id => $this->find($id)];
             })
             ->filter()
             ->toArray();
 
-        return $redirects;
+        return $detours;
     }
 
     public function find(string $id): ?Detour
     {
         $file = $this->filePath($id);
-
         if (! File::exists($file)) {
             return null;
         }
 
         $data = YAML::parse(File::get($file));
 
-        $redirect = Detour::make($id);
+        $detour = Detour::make($id);
 
-        $redirect->data($data);
+        $detour->data($data);
 
-        return $redirect;
+        return $detour;
     }
 
-    public function save(Detour $redirect): void
+    public function save(Detour $detour): void
     {
-        $file = $this->filePath($redirect->id());
+        $file = $this->filePath($detour->id());
 
         File::ensureDirectoryExists($this->path);
-        File::put($file, YAML::dump($redirect->data()));
+        File::put($file, YAML::dump($detour->data()));
     }
 
-    public function delete(Detour $redirect): void
+    public function delete(Detour $detour): void
     {
-        $file = $this->filePath($redirect->id());
+        $file = $this->filePath($detour->id());
 
         if (File::exists($file)) {
             File::delete($file);

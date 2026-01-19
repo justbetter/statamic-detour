@@ -4,12 +4,13 @@ namespace JustBetter\Detour\Data;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use JsonSerializable;
 
-class Detour
+class Detour implements JsonSerializable
 {
     protected string $id;
 
-    /** @var array<mixed, mixed> */
+    /** @var array<string, string | array<int, string>> */
     protected array $data = [];
 
     public static function make(?string $id = null): self
@@ -26,10 +27,10 @@ class Detour
     }
 
     /**
-     * @param  array<mixed, mixed>  $data
-     * @return array<mixed, mixed>
+     * @param  array<string, string | array<int, string>>  $data
+     * @return array<string, string | array<int, string>> | static
      */
-    public function data(?array $data = null): array
+    public function data(?array $data = null): array|static
     {
         if (func_num_args() === 0) {
             return $this->data;
@@ -37,7 +38,7 @@ class Detour
 
         $this->data = $data ?? [];
 
-        return $this->data;
+        return $this;
     }
 
     /**
@@ -46,5 +47,19 @@ class Detour
     public function get(string $key, $default = null): mixed
     {
         return Arr::get($this->data, $key, $default);
+    }
+
+    /**
+     * @return array<string, string | array<int, string>>
+     */
+    public function jsonSerialize(): array
+    {
+        /** @var array<string, string | array<int, string>> $data */
+        $data = $this->data();
+
+        return [
+            'id' => $this->id(),
+            ...$data,
+        ];
     }
 }

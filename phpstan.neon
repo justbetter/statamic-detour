@@ -6,4 +6,4 @@ parameters:
     paths:
         - src
         - tests
-    level: 10
+    level: 9
