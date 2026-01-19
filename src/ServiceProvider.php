@@ -2,17 +2,17 @@
 
 namespace JustBetter\Detour;
 
+use Illuminate\Routing\Router;
 use JustBetter\Detour\Contracts\DetourContract;
 use JustBetter\Detour\Contracts\DetourRepositoryContract;
 use JustBetter\Detour\Data\Eloquent\Detour as EloquentDetour;
 use JustBetter\Detour\Data\File\Detour as FileDetour;
 use JustBetter\Detour\Exceptions\DetourDriverNotFound;
+use JustBetter\Detour\Http\Middleware\RedirectIfNeeded;
 use JustBetter\Detour\Repositories\Eloquent\DetourRepository as EloquentDetourRepository;
 use JustBetter\Detour\Repositories\File\DetourRepository as FileDetourRepository;
 use Statamic\Facades\CP\Nav;
 use Statamic\Providers\AddonServiceProvider;
-use Illuminate\Routing\Router;
-use JustBetter\Detour\Http\Middleware\RedirectIfNeeded;
 
 class ServiceProvider extends AddonServiceProvider
 {

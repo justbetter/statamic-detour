@@ -2,7 +2,7 @@
 
 return [
 
-    'driver' => 'eloquent', // file | eloquent
+    'driver' => 'file', // file | eloquent
 
     'path' => base_path('content/detours'),
 
