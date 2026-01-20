@@ -5,7 +5,7 @@ use JustBetter\Detour\Repositories\FileRepository;
 
 return [
 
-    'driver' => 'eloquent',
+    'driver' => 'file',
 
     'drivers' => [
         'file' => FileRepository::class,

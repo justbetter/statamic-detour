@@ -23,7 +23,7 @@ class FileDetourRepositoryTest extends TestCase
         parent::setUp();
 
         foreach (scandir(__DIR__.'/../__fixtures__/detours') as $file) {
-            if ($file === '.' || $file === '..') {
+            if ($file === '.' || $file === '..' || $file === '.gitkeep') {
                 continue;
             }
 

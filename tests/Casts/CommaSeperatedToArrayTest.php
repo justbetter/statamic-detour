@@ -10,6 +10,13 @@ use PHPUnit\Framework\Attributes\Test;
 
 class CommaSeperatedToArrayTest extends TestCase
 {
+    protected function defineEnvironment($app): void
+    {
+        parent::defineEnvironment($app);
+
+        $app['config']->set('justbetter.statamic-detour.driver', 'eloquent');
+    }
+    
     #[Test]
     public function set_returns_value_as_is(): void
     {
