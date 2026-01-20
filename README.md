@@ -22,7 +22,7 @@ This Statamic addon provides a flexible redirect management system for your Stat
 You can install this addon via Composer:
 
 ```bash
-composer require just-better/statamic-detour
+composer require justbetter/statamic-detour
 ```
 
 ## Configuration

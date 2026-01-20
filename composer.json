@@ -1,5 +1,5 @@
 {
-    "name": "just-better/statamic-detour",
+    "name": "justbetter/statamic-detour",
     "description": "Statamic addon for redirects.",
     "require": {
         "statamic/cms": "^5.0",
