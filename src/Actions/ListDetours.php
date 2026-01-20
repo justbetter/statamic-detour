@@ -9,12 +9,12 @@ use Statamic\Fields\Blueprint;
 class ListDetours implements ListsDetours
 {
     public function __construct(
-        protected ResolvesRepository $respositoryContract
+        protected ResolvesRepository $resolvesRepository
     ) {}
 
     public function list(): array
     {
-        $repository = $this->respositoryContract->resolve();
+        $repository = $this->resolvesRepository->resolve();
 
         // @phpstan-ignore-next-line
         $oldDirectory = Blueprint::directory();
