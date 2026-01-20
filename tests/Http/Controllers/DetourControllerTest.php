@@ -2,9 +2,10 @@
 
 namespace JustBetter\Detour\Tests\Http\Controllers;
 
+use Illuminate\Support\Str;
 use Illuminate\View\View;
-use JustBetter\Detour\Contracts\DetourRepositoryContract;
-use JustBetter\Detour\Data\File\Detour;
+use JustBetter\Detour\Actions\ResolveRepository;
+use JustBetter\Detour\Data\FileDetour;
 use JustBetter\Detour\Http\Controllers\DetourController;
 use JustBetter\Detour\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
@@ -15,8 +16,8 @@ class DetourControllerTest extends TestCase
     public function it_can_load_a_view(): void
     {
         $controller = app(DetourController::class);
-        $contract = app(DetourRepositoryContract::class);
-        $this->assertInstanceOf(View::class, $controller->index($contract));
+
+        $this->assertInstanceOf(View::class, $controller->index());
     }
 
     #[Test]
@@ -35,19 +36,17 @@ class DetourControllerTest extends TestCase
     #[Test]
     public function it_can_destroy_data(): void
     {
-        $repository = app(DetourRepositoryContract::class);
-
-        $detour = Detour::make();
-
+        $contract = app(ResolveRepository::class);
+        $repository = $contract->resolve();
         $data = [
-            'id' => $detour->id(),
+            'id' => Str::uuid()->toString(),
             'from' => '::from::',
             'to' => '::to::',
             'code' => '302',
             'type' => '::path::',
         ];
 
-        $detour->data($data);
+        $detour = FileDetour::make($data);
 
         $repository->save($detour);
 

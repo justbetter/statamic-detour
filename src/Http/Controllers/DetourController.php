@@ -6,17 +6,24 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use JustBetter\Detour\Contracts\DetourContract;
-use JustBetter\Detour\Contracts\DetourRepositoryContract;
+use JustBetter\Detour\Contracts\ResolvesRepository;
+use JustBetter\Detour\Data\BaseDetour;
 use Statamic\Fields\Blueprint;
 use Statamic\Fields\BlueprintRepository;
 
 class DetourController
 {
-    public function index(DetourRepositoryContract $contract): View
+    public function __construct(
+        protected ResolvesRepository $repositoryContract
+    ) {}
+
+    public function index(): View
     {
+        $repository = $this->repositoryContract->resolve();
+
         // @phpstan-ignore-next-line
         $oldDirectory = Blueprint::directory();
-        $values = $contract->all();
+        $values = $repository->all();
 
         // @phpstan-ignore-next-line
         $blueprint = Blueprint::setDirectories(__DIR__.'/../../../resources/blueprints')->find('detour');
@@ -41,31 +48,35 @@ class DetourController
         ]);
     }
 
-    public function store(Request $request, DetourRepositoryContract $contract): JsonResponse
+    public function store(Request $request): JsonResponse
     {
+        $repository = $this->repositoryContract->resolve();
+
         $blueprint = (new BlueprintRepository)->setDirectories(__DIR__.'/../../../resources/blueprints')->find('detour');
         $fields = $blueprint->fields();
 
         $data = $request->all();
 
         $detourContract = app(DetourContract::class);
-        $detour = $detourContract::make();
+
         $fields = $fields->addValues($data);
         $fields->validate();
 
-        /** @var DetourContract $detour */
-        $detour = $detour->data($fields->validate());
+        /** @var BaseDetour $detour */
+        $detour = $detourContract::make($data);
 
-        $contract->save($detour);
+        $repository->save($detour);
 
         return response()->json($detour);
     }
 
-    public function destroy(string $detour, DetourRepositoryContract $contract): void
+    public function destroy(string $detour): void
     {
-        /** @var DetourContract $foundDetour */
-        $foundDetour = $contract->find($detour);
+        $repository = $this->repositoryContract->resolve();
 
-        $contract->delete($foundDetour);
+        /** @var BaseDetour $foundDetour */
+        $foundDetour = $repository->find($detour);
+
+        $repository->delete($foundDetour);
     }
 }

@@ -1,45 +1,48 @@
 <?php
 
-namespace JustBetter\Detour\Tests\Repositories\File;
+namespace JustBetter\Detour\Tests\Repositories;
 
-use JustBetter\Detour\Contracts\DetourRepositoryContract;
-use JustBetter\Detour\Data\Eloquent\Detour;
+use Illuminate\Support\Str;
+use JustBetter\Detour\Actions\ResolveRepository;
+use JustBetter\Detour\Data\FileDetour;
 use JustBetter\Detour\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
-class DetourRepositoryTest extends TestCase
+class FileDetourRepositoryTest extends TestCase
 {
     protected function defineEnvironment($app): void
     {
         parent::defineEnvironment($app);
 
         $app['config']->set('justbetter.statamic-detour.driver', 'file');
-        $app['config']->set('justbetter.statamic-detour.path', __DIR__.'/../../__fixtures__/detours');
+        $app['config']->set('justbetter.statamic-detour.path', __DIR__.'/../__fixtures__/detours');
     }
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        foreach (scandir(__DIR__.'/../../__fixtures__/detours') as $file) {
+        foreach (scandir(__DIR__.'/../__fixtures__/detours') as $file) {
             if ($file === '.' || $file === '..') {
                 continue;
             }
 
-            unlink(__DIR__.'/../../__fixtures__/detours/'.$file);
+            unlink(__DIR__.'/../__fixtures__/detours/'.$file);
         }
     }
 
     #[Test]
     public function it_can_be_queried(): void
     {
-        $repository = app(DetourRepositoryContract::class);
-        $detour = Detour::make();
+        $contract = app(ResolveRepository::class);
+        $repository = $contract->resolve();
+        $id = Str::uuid()->toString();
+        $detour = FileDetour::make(['id' => $id]);
         $repository->save($detour);
 
-        $detour = Detour::make();
+        $id = Str::uuid()->toString();
+        $detour = FileDetour::make(['id' => $id]);
         $repository->save($detour);
-
         $all = $repository->all();
 
         $this->assertCount(2, $all);
@@ -48,23 +51,20 @@ class DetourRepositoryTest extends TestCase
     #[Test]
     public function it_can_be_created(): void
     {
-        $repository = app(DetourRepositoryContract::class);
-
-        $detour = Detour::make();
-
+        $contract = app(ResolveRepository::class);
+        $repository = $contract->resolve();
+        $id = Str::uuid()->toString();
         $data = [
-            'id' => $detour->id(),
+            'id' => $id,
             'from' => '::from::',
             'to' => '::to::',
             'code' => '302',
             'type' => '::path::',
         ];
 
-        $detour->data($data);
-
+        $detour = FileDetour::make($data);
         $repository->save($detour);
-
-        $path = config('justbetter.statamic-detour.path');
+        $path = config()->string('justbetter.statamic-detour.path');
 
         $this->assertFileExists($path.'/'.$detour->id().'.yaml');
     }
@@ -72,31 +72,31 @@ class DetourRepositoryTest extends TestCase
     #[Test]
     public function it_can_be_deleted(): void
     {
-        $repository = app(DetourRepositoryContract::class);
+        $contract = app(ResolveRepository::class);
+        $repository = $contract->resolve();
 
-        $detour = Detour::make();
-
+        $id = Str::uuid()->toString();
         $data = [
-            'id' => $detour->id(),
+            'id' => $id,
             'from' => '::from::',
             'to' => '::to::',
             'code' => '302',
             'type' => '::path::',
         ];
 
-        $detour->data($data);
-
+        $detour = FileDetour::make($data);
         $repository->save($detour);
-
         $repository->delete($detour);
-        $path = config('justbetter.statamic-detour.path');
+        $path = config()->string('justbetter.statamic-detour.path');
         $this->assertFileDoesNotExist($path.'/'.$detour->id().'.yaml');
     }
 
     #[Test]
     public function it_can_not_find_what_does_not_exist(): void
     {
-        $repository = app(DetourRepositoryContract::class);
+        $contract = app(ResolveRepository::class);
+        $repository = $contract->resolve();
+
         $detour = $repository->find('::non-existing::');
 
         $this->assertNull($detour);

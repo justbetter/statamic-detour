@@ -6,16 +6,9 @@ interface DetourContract
 {
     public function id(): string;
 
-    public static function make(?string $id = null): self;
-
     /**
-     * @param  array<string, string | array<int, string>>  $data
-     * @return array<string, string | array<int, string>> | static
+     * @param  iterable<string, string | array<int, string>>  $attributes
+     * @return static
      */
-    public function data(?array $data = null): array|static;
-
-    /**
-     * @return array<string, string | array<int, string>>
-     */
-    public function jsonSerialize(): array;
+    public static function make($attributes = []);
 }

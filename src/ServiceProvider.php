@@ -3,14 +3,13 @@
 namespace JustBetter\Detour;
 
 use Illuminate\Routing\Router;
+use JustBetter\Detour\Actions\ResolveRepository;
 use JustBetter\Detour\Contracts\DetourContract;
-use JustBetter\Detour\Contracts\DetourRepositoryContract;
-use JustBetter\Detour\Data\Eloquent\Detour as EloquentDetour;
-use JustBetter\Detour\Data\File\Detour as FileDetour;
-use JustBetter\Detour\Exceptions\DetourDriverNotFound;
+use JustBetter\Detour\Data\EloquentDetour;
+use JustBetter\Detour\Data\FileDetour;
+use JustBetter\Detour\Exceptions\DriverNotFound;
 use JustBetter\Detour\Http\Middleware\RedirectIfNeeded;
-use JustBetter\Detour\Repositories\Eloquent\DetourRepository as EloquentDetourRepository;
-use JustBetter\Detour\Repositories\File\DetourRepository as FileDetourRepository;
+use JustBetter\Detour\Repositories\FileRepository;
 use Statamic\Facades\CP\Nav;
 use Statamic\Providers\AddonServiceProvider;
 
@@ -84,7 +83,7 @@ class ServiceProvider extends AddonServiceProvider
         };
 
         if (! $data) {
-            throw new DetourDriverNotFound('Invalid Detour driver: '.$driver);
+            throw new DriverNotFound('Invalid Detour driver: '.$driver);
         }
 
         $this->app->bind(DetourContract::class, fn () => new $data);
@@ -94,22 +93,8 @@ class ServiceProvider extends AddonServiceProvider
 
     protected function registerRepository(): static
     {
-        /** @var string $driver */
-        $driver = config('justbetter.statamic-detour.driver');
-
-        $repository = match ($driver) {
-            'file' => FileDetourRepository::class,
-            'eloquent' => EloquentDetourRepository::class,
-            default => null,
-        };
-
-        if (! $repository) {
-            throw new DetourDriverNotFound('Invalid Detour driver: '.$driver);
-        }
-
-        /** @var string $path */
-        $path = config('justbetter.statamic-detour.path');
-        $this->app->bind(DetourRepositoryContract::class, fn () => new $repository($path));
+        ResolveRepository::bind();
+        FileRepository::bind();
 
         return $this;
     }

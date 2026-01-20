@@ -2,12 +2,13 @@
 
 namespace JustBetter\Detour\Tests\Data\Eloquent;
 
-use JustBetter\Detour\Data\Eloquent\Detour;
+use Illuminate\Support\Str;
+use JustBetter\Detour\Data\EloquentDetour;
 use JustBetter\Detour\Models\Detour as DetourModel;
 use JustBetter\Detour\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
-class DetourTest extends TestCase
+class EloquentDetourTest extends TestCase
 {
     protected function defineEnvironment($app): void
     {
@@ -17,64 +18,32 @@ class DetourTest extends TestCase
     }
 
     #[Test]
-    public function it_can_be_made(): void
-    {
-        $detour = Detour::make();
-
-        $this->assertNotNull($detour->id());
-    }
-
-    #[Test]
     public function it_can_have_a_model(): void
     {
-        $detour = Detour::make();
-
         $model = DetourModel::create([
-            'id' => $detour->id(),
+            'id' => Str::uuid()->toString(),
             'from' => '::from::',
             'to' => '::to::',
             'code' => '302',
             'type' => '::path::',
         ]);
 
-        $detour->model($model);
+        $detour = EloquentDetour::fromModel($model);
+
         $this->assertSame($detour->model(), $model);
     }
 
     #[Test]
     public function it_can_have_data(): void
     {
-        $detour = Detour::make();
-
-        $detour->data([
+        $detour = EloquentDetour::make([
             'from' => '::from::',
             'to' => '::to::',
             'code' => '302',
             'type' => '::path::',
         ]);
 
-        $this->assertSame($detour->data(), [
-            'from' => '::from::',
-            'to' => '::to::',
-            'code' => '302',
-            'type' => '::path::',
-        ]);
-    }
-
-    #[Test]
-    public function it_can_be_a_json_response(): void
-    {
-        $detour = Detour::make();
-
-        $detour->data([
-            'from' => '::from::',
-            'to' => '::to::',
-            'code' => '302',
-            'type' => '::path::',
-        ]);
-
-        $this->assertSame($detour->jsonSerialize(), [
-            'id' => $detour->id(),
+        $this->assertSame($detour->getAttributes(), [
             'from' => '::from::',
             'to' => '::to::',
             'code' => '302',

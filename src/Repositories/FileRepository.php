@@ -1,24 +1,25 @@
 <?php
 
-namespace JustBetter\Detour\Repositories\File;
+namespace JustBetter\Detour\Repositories;
 
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\File;
-use JustBetter\Detour\Contracts\DetourContract;
-use JustBetter\Detour\Contracts\DetourRepositoryContract;
-use JustBetter\Detour\Data\File\Detour;
+use JustBetter\Detour\Data\BaseDetour;
+use JustBetter\Detour\Data\FileDetour;
 use Statamic\Facades\YAML;
 use Symfony\Component\Finder\SplFileInfo;
 
-class DetourRepository implements DetourRepositoryContract
+class FileRepository extends BaseRepository
 {
-    public function __construct(protected string $path)
-    {
+    public function __construct(
+        protected string $path
+    ) {
         File::ensureDirectoryExists($this->path);
     }
 
     public function all(): array
     {
-        /** @var array<string, DetourContract> $detours */
+        /** @var array<string, FileDetour> $detours */
         $detours = collect(File::allFiles($this->path))
             ->filter(fn (SplFileInfo $file): bool => str($file->getFilename())->endsWith('.yaml'))
             ->mapWithKeys(function (SplFileInfo $file): array {
@@ -32,7 +33,7 @@ class DetourRepository implements DetourRepositoryContract
         return $detours;
     }
 
-    public function find(string $id): ?Detour
+    public function find(string $id): ?FileDetour
     {
         $file = $this->filePath($id);
         if (! File::exists($file)) {
@@ -40,22 +41,20 @@ class DetourRepository implements DetourRepositoryContract
         }
 
         $data = YAML::parse(File::get($file));
-        $detour = Detour::make($id);
-
-        $detour->data($data);
+        $detour = FileDetour::make(['id' => $id, ...$data]);
 
         return $detour;
     }
 
-    public function save(DetourContract $detour): void
+    public function save(BaseDetour $detour): void
     {
         $file = $this->filePath($detour->id());
 
         File::ensureDirectoryExists($this->path);
-        File::put($file, YAML::dump($detour->data()));
+        File::put($file, YAML::dump($detour->getAttributes()));
     }
 
-    public function delete(DetourContract $detour): void
+    public function delete(BaseDetour $detour): void
     {
         $file = $this->filePath($detour->id());
 
@@ -67,5 +66,12 @@ class DetourRepository implements DetourRepositoryContract
     protected function filePath(string $id): string
     {
         return rtrim($this->path, '/')."/{$id}.yaml";
+    }
+
+    public static function bind(): void
+    {
+        app()->bind(FileRepository::class, function (Application $app): FileRepository {
+            return new FileRepository(config()->string('justbetter.statamic-detour.path'));
+        });
     }
 }

@@ -4,4 +4,4 @@ namespace JustBetter\Detour\Exceptions;
 
 use Exception;
 
-class DetourDriverNotFound extends Exception {}
+class DetourException extends Exception {}

@@ -22,7 +22,7 @@
                     <td class="px-4 py-3 text-sm font-medium">{{ item.code }}</td>
                     <td class="px-4 py-3 text-sm space-x-2">
 
-                        <span class="rounded-full bg-green-500 text-white p-2" v-if="item.sites.length === 0">{{ __('All') }}</span>
+                        <span class="rounded-full bg-green-500 text-white p-2" v-if="item.sites?.length === 0">{{ __('All') }}</span>
                         <span class="rounded-full bg-green-500 text-white p-2" v-for="site in item.sites" v-else :key="site">{{ site }}</span>
                     </td>
                     <td class="px-4 py-3 text-right">

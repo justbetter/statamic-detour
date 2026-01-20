@@ -2,13 +2,14 @@
 
 namespace JustBetter\Detour\Tests\Repositories\Eloquent;
 
-use JustBetter\Detour\Contracts\DetourRepositoryContract;
-use JustBetter\Detour\Data\Eloquent\Detour;
+use Illuminate\Support\Str;
+use JustBetter\Detour\Actions\ResolveRepository;
+use JustBetter\Detour\Data\EloquentDetour;
 use JustBetter\Detour\Models\Detour as DetourModel;
 use JustBetter\Detour\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
-class DetourRepositoryTest extends TestCase
+class EloquentDetourRepositoryTest extends TestCase
 {
     protected function defineEnvironment($app): void
     {
@@ -20,27 +21,28 @@ class DetourRepositoryTest extends TestCase
     #[Test]
     public function it_can_be_queried(): void
     {
-        $detour = Detour::make();
-
-        DetourModel::create([
-            'id' => $detour->id(),
+        $model = DetourModel::create([
+            'id' => Str::uuid()->toString(),
             'from' => '::from::',
             'to' => '::to::',
             'code' => '302',
             'type' => '::path::',
         ]);
 
-        $detour = Detour::make();
+        EloquentDetour::fromModel($model);
 
-        DetourModel::create([
-            'id' => $detour->id(),
+        $model = DetourModel::create([
+            'id' => Str::uuid()->toString(),
             'from' => '::from::',
             'to' => '::to::',
             'code' => '302',
             'type' => '::path::',
         ]);
 
-        $repository = app(DetourRepositoryContract::class);
+        EloquentDetour::fromModel($model);
+
+        $contract = app(ResolveRepository::class);
+        $repository = $contract->resolve();
 
         $all = $repository->all();
 
@@ -50,19 +52,18 @@ class DetourRepositoryTest extends TestCase
     #[Test]
     public function it_can_be_created(): void
     {
-        $repository = app(DetourRepositoryContract::class);
-
-        $detour = Detour::make();
+        $contract = app(ResolveRepository::class);
+        $repository = $contract->resolve();
 
         $data = [
-            'id' => $detour->id(),
+            'id' => Str::uuid()->toString(),
             'from' => '::from::',
             'to' => '::to::',
             'code' => '302',
             'type' => '::path::',
         ];
 
-        $detour->data($data);
+        $detour = EloquentDetour::make($data);
 
         $repository->save($detour);
 
@@ -78,20 +79,18 @@ class DetourRepositoryTest extends TestCase
     #[Test]
     public function it_can_be_deleted(): void
     {
-        $repository = app(DetourRepositoryContract::class);
-
-        $detour = Detour::make();
+        $contract = app(ResolveRepository::class);
+        $repository = $contract->resolve();
 
         $data = [
-            'id' => $detour->id(),
+            'id' => Str::uuid()->toString(),
             'from' => '::from::',
             'to' => '::to::',
             'code' => '302',
             'type' => '::path::',
         ];
 
-        $detour->data($data);
-
+        $detour = EloquentDetour::make($data);
         $repository->save($detour);
 
         $repository->delete($detour);

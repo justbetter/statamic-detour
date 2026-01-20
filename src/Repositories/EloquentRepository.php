@@ -1,19 +1,16 @@
 <?php
 
-namespace JustBetter\Detour\Repositories\Eloquent;
+namespace JustBetter\Detour\Repositories;
 
-use JustBetter\Detour\Contracts\DetourContract;
-use JustBetter\Detour\Contracts\DetourRepositoryContract;
-use JustBetter\Detour\Data\Eloquent\Detour;
+use JustBetter\Detour\Data\BaseDetour;
+use JustBetter\Detour\Data\EloquentDetour;
 use JustBetter\Detour\Models\Detour as DetourModel;
 
-class DetourRepository implements DetourRepositoryContract
+class EloquentRepository extends BaseRepository
 {
-    public function __construct(protected string $path) {}
-
     public function all(): array
     {
-        /** @var array<string, DetourContract> $detours */
+        /** @var array<string, EloquentDetour> $detours */
         $detours = collect(DetourModel::all())
             ->mapWithKeys(function (DetourModel $detour): array {
                 return [$detour->id => $this->find($detour->id)];
@@ -24,30 +21,22 @@ class DetourRepository implements DetourRepositoryContract
         return $detours;
     }
 
-    public function find(string $id): ?DetourContract
+    public function find(string $id): EloquentDetour
     {
-        /** @var Detour $contract */
-        $contract = app(DetourContract::class);
-
         $model = DetourModel::findOrFail($id);
 
-        $detour = $contract->model($model);
-
-        /** @var array<string, array<int, string>|string> $data */
-        $data = $model->toArray();
-        /** @var DetourContract $detour */
-        $detour = $contract->data($data);
+        $detour = EloquentDetour::fromModel($model);
 
         return $detour;
     }
 
     /**
-     * @param  Detour  $detour
+     * @param  EloquentDetour  $detour
      */
-    public function save(DetourContract $detour): void
+    public function save(BaseDetour $detour): void
     {
         /** @var array<string, array<int, string>|string> $data */
-        $data = $detour->data();
+        $data = $detour->getAttributes();
         $data = collect($data)->map(function ($value, $key) {
             return is_array($value) ? implode(',', $value) : $value;
         })->toArray();
@@ -58,9 +47,9 @@ class DetourRepository implements DetourRepositoryContract
     }
 
     /**
-     * @param  Detour  $detour
+     * @param  EloquentDetour  $detour
      */
-    public function delete(DetourContract $detour): void
+    public function delete(BaseDetour $detour): void
     {
         /** @var DetourModel $model */
         $model = $detour->model();
