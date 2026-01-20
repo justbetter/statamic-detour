@@ -1,3 +1,4 @@
+resources/dist/hot
 vendor
 composer.lock
 .phpunit.result.cache
