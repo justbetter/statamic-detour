@@ -1,0 +1,29 @@
+<?php
+
+namespace JustBetter\Detour\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+/**
+ * @property string $from
+ * @property string $to
+ * @property string $type
+ * @property int $code
+ * @property array<int, string> $sites
+ */
+class StoreRequest extends FormRequest
+{
+    /**
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'from' => 'present|string',
+            'to' => 'present|string',
+            'type' => 'required|string|in:path,regex',
+            'code' => 'required|integer',
+            'sites' => 'present|array',
+        ];
+    }
+}

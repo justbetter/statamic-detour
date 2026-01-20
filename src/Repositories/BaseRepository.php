@@ -2,18 +2,19 @@
 
 namespace JustBetter\Detour\Repositories;
 
-use JustBetter\Detour\Data\BaseDetour;
+use JustBetter\Detour\Data\Detour;
+use JustBetter\Detour\Data\Form;
 
 abstract class BaseRepository
 {
     /**
-     * @return array<string, BaseDetour>
+     * @return array<string, Detour>
      */
     abstract public function all(): array;
 
-    abstract public function find(string $id): ?BaseDetour;
+    abstract public function find(string $id): ?Detour;
 
-    abstract public function save(BaseDetour $detour): void;
+    abstract public function store(Form $form): Detour;
 
-    abstract public function delete(BaseDetour $detour): void;
+    abstract public function delete(string $id): void;
 }

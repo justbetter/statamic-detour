@@ -3,11 +3,10 @@
 namespace JustBetter\Detour;
 
 use Illuminate\Routing\Router;
+use JustBetter\Detour\Actions\DeleteDetour;
+use JustBetter\Detour\Actions\ListDetours;
 use JustBetter\Detour\Actions\ResolveRepository;
-use JustBetter\Detour\Contracts\DetourContract;
-use JustBetter\Detour\Data\EloquentDetour;
-use JustBetter\Detour\Data\FileDetour;
-use JustBetter\Detour\Exceptions\DriverNotFound;
+use JustBetter\Detour\Actions\StoreDetour;
 use JustBetter\Detour\Http\Middleware\RedirectIfNeeded;
 use JustBetter\Detour\Repositories\FileRepository;
 use Statamic\Facades\CP\Nav;
@@ -28,21 +27,64 @@ class ServiceProvider extends AddonServiceProvider
         'publicDirectory' => 'resources/dist',
     ];
 
-    public function bootAddon(): void
-    {
-        $this->bootConfig()
-            ->bootNavigation()
-            ->bootMigrations();
-    }
-
     public function register(): void
     {
         parent::register();
 
-        $this->registerConfig()
+        $this
+            ->registerConfig()
             ->registerRepository()
-            ->registerData()
             ->registerMiddleware();
+    }
+
+    protected function registerConfig(): static
+    {
+        $this->mergeConfigFrom(__DIR__.'/../config/statamic-detour.php', 'justbetter.statamic-detour');
+
+        return $this;
+    }
+
+    protected function registerRepository(): static
+    {
+        ResolveRepository::bind();
+        DeleteDetour::bind();
+        ListDetours::bind();
+        StoreDetour::bind();
+
+        FileRepository::bind();
+
+        return $this;
+    }
+
+    protected function registerMiddleware(): static
+    {
+        $this->app->booted(function () {
+            $router = app(Router::class);
+            if (config('justbetter.statamic-detour.mode') === 'performance') {
+                $router->pushMiddlewareToGroup('web', RedirectIfNeeded::class);
+            } else {
+                $router->prependMiddlewareToGroup('web', RedirectIfNeeded::class);
+            }
+        });
+
+        return $this;
+    }
+
+    public function bootAddon(): void
+    {
+        $this
+            ->bootConfig()
+            ->bootNavigation()
+            ->bootMigrations();
+    }
+
+    protected function bootConfig(): static
+    {
+        $this->publishes([
+            __DIR__.'/../config/statamic-detour.php' => config_path('static-cache-warmer.php'),
+        ], 'justbetter-statamic-detour');
+
+        return $this;
     }
 
     protected function bootNavigation(): static
@@ -67,64 +109,6 @@ class ServiceProvider extends AddonServiceProvider
         }
 
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-
-        return $this;
-    }
-
-    protected function registerData(): static
-    {
-        /** @var string $driver */
-        $driver = config('justbetter.statamic-detour.driver');
-
-        $data = match ($driver) {
-            'file' => FileDetour::class,
-            'eloquent' => EloquentDetour::class,
-            default => null,
-        };
-
-        if (! $data) {
-            throw new DriverNotFound('Invalid Detour driver: '.$driver);
-        }
-
-        $this->app->bind(DetourContract::class, fn () => new $data);
-
-        return $this;
-    }
-
-    protected function registerRepository(): static
-    {
-        ResolveRepository::bind();
-        FileRepository::bind();
-
-        return $this;
-    }
-
-    protected function registerConfig(): static
-    {
-        $this->mergeConfigFrom(__DIR__.'/../config/statamic-detour.php', 'justbetter.statamic-detour');
-
-        return $this;
-    }
-
-    protected function registerMiddleware(): static
-    {
-        $this->app->booted(function () {
-            $router = app(Router::class);
-            if (config('justbetter.statamic-detour.mode') === 'performance') {
-                $router->pushMiddlewareToGroup('web', RedirectIfNeeded::class);
-            } else {
-                $router->prependMiddlewareToGroup('web', RedirectIfNeeded::class);
-            }
-        });
-
-        return $this;
-    }
-
-    protected function bootConfig(): static
-    {
-        $this->publishes([
-            __DIR__.'/../config/statamic-detour.php' => config_path('static-cache-warmer.php'),
-        ], 'justbetter-statamic-detour');
 
         return $this;
     }

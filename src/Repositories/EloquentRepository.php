@@ -2,57 +2,45 @@
 
 namespace JustBetter\Detour\Repositories;
 
-use JustBetter\Detour\Data\BaseDetour;
-use JustBetter\Detour\Data\EloquentDetour;
+use JustBetter\Detour\Data\Detour;
+use JustBetter\Detour\Data\Form;
 use JustBetter\Detour\Models\Detour as DetourModel;
 
 class EloquentRepository extends BaseRepository
 {
     public function all(): array
     {
-        /** @var array<string, EloquentDetour> $detours */
-        $detours = collect(DetourModel::all())
+        /** @var array<string, Detour> $detours */
+        $detours = DetourModel::query()
+            ->get()
             ->mapWithKeys(function (DetourModel $detour): array {
-                return [$detour->id => $this->find($detour->id)];
+                return [$detour->id => Detour::make($detour->toArray())];
             })
-            ->filter()
             ->toArray();
 
         return $detours;
     }
 
-    public function find(string $id): EloquentDetour
+    public function find(string $id): Detour
     {
         $model = DetourModel::findOrFail($id);
 
-        $detour = EloquentDetour::fromModel($model);
-
-        return $detour;
+        return Detour::make($model->toArray());
     }
 
-    /**
-     * @param  EloquentDetour  $detour
-     */
-    public function save(BaseDetour $detour): void
+    public function store(Form $form): Detour
     {
-        /** @var array<string, array<int, string>|string> $data */
-        $data = $detour->getAttributes();
-        $data = collect($data)->map(function ($value, $key) {
-            return is_array($value) ? implode(',', $value) : $value;
-        })->toArray();
+        $data = $form->toArray();
 
-        $model = DetourModel::updateOrCreate(['id' => $detour->id()], $data);
+        $model = DetourModel::query()->create($data);
 
-        $model = $detour->model($model);
+        return Detour::make($model->toArray());
     }
 
-    /**
-     * @param  EloquentDetour  $detour
-     */
-    public function delete(BaseDetour $detour): void
+    public function delete(string $id): void
     {
-        /** @var DetourModel $model */
-        $model = $detour->model();
+        $model = DetourModel::findOrFail($id);
+
         $model->delete();
     }
 }

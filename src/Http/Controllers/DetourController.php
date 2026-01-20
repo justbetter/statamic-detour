@@ -3,80 +3,35 @@
 namespace JustBetter\Detour\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
-use JustBetter\Detour\Contracts\DetourContract;
-use JustBetter\Detour\Contracts\ResolvesRepository;
-use JustBetter\Detour\Data\BaseDetour;
-use Statamic\Fields\Blueprint;
-use Statamic\Fields\BlueprintRepository;
+use JustBetter\Detour\Contracts\DeletesDetour;
+use JustBetter\Detour\Contracts\ListsDetours;
+use JustBetter\Detour\Contracts\StoresDetour;
+use JustBetter\Detour\Data\Form;
+use JustBetter\Detour\Http\Requests\StoreRequest;
 
 class DetourController
 {
-    public function __construct(
-        protected ResolvesRepository $repositoryContract
-    ) {}
-
-    public function index(): View
+    public function index(ListsDetours $contract): mixed
     {
-        $repository = $this->repositoryContract->resolve();
-
-        // @phpstan-ignore-next-line
-        $oldDirectory = Blueprint::directory();
-        $values = $repository->all();
-
-        // @phpstan-ignore-next-line
-        $blueprint = Blueprint::setDirectories(__DIR__.'/../../../resources/blueprints')->find('detour');
-        $fields = $blueprint->fields();
-        $fields = $fields->addValues($values);
-        $fields = $fields->preProcess();
-
-        if ($oldDirectory) {
-            // @phpstan-ignore-next-line
-            Blueprint::setDirectories($oldDirectory);
-        }
-
+        $data = $contract->list();
         /** @var view-string $view */
         $view = 'statamic-detour::detours.index';
 
-        return view($view, [
-            'blueprint' => $blueprint->toPublishArray(),
-            'values' => $fields->values(),
-            'meta' => $fields->meta(),
-            'data' => $values,
-            'action' => cp_route('justbetter.detours.store'),
-        ]);
+        return view($view, $data);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreRequest $request, StoresDetour $contract): JsonResponse
     {
-        $repository = $this->repositoryContract->resolve();
-
-        $blueprint = (new BlueprintRepository)->setDirectories(__DIR__.'/../../../resources/blueprints')->find('detour');
-        $fields = $blueprint->fields();
-
-        $data = $request->all();
-
-        $detourContract = app(DetourContract::class);
-
-        $fields = $fields->addValues($data);
-        $fields->validate();
-
-        /** @var BaseDetour $detour */
-        $detour = $detourContract::make($data);
-
-        $repository->save($detour);
-
-        return response()->json($detour);
+        return response()->json(
+            $contract->store(
+                Form::make($request->validated())
+            )
+        );
     }
 
-    public function destroy(string $detour): void
+    public function destroy(string $id, DeletesDetour $contract): void
     {
-        $repository = $this->repositoryContract->resolve();
-
-        /** @var BaseDetour $foundDetour */
-        $foundDetour = $repository->find($detour);
-
-        $repository->delete($foundDetour);
+        $contract->delete($id);
     }
 }

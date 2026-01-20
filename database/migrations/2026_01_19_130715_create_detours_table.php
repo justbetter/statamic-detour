@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('to');
             $table->string('code');
             $table->string('type');
-            $table->string('sites')->nullable();
+            $table->json('sites')->nullable();
 
             $table->timestamps();
         });
