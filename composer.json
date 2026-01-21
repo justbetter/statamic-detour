@@ -2,7 +2,7 @@
     "name": "justbetter/statamic-detour",
     "description": "Statamic addon for redirects.",
     "require": {
-        "statamic/cms": "^5.0",
+        "statamic/cms": "^5.67.0",
         "laravel/framework": "^12.0",
         "php": "^8.3"
     },
