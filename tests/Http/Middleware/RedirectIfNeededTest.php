@@ -38,7 +38,8 @@ class RedirectIfNeededTest extends TestCase
     }
 
     #[Test]
-    public function it_redirects_when_from_path_is_missing_a_leading_slash(): void {
+    public function it_redirects_when_from_path_is_missing_a_leading_slash(): void
+    {
         DetourModel::create([
             'from' => '::from::',
             'to' => '::to::',
