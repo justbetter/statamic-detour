@@ -16,9 +16,8 @@ class HandleDetour implements HandlesDetour
     public function resolveRedirect(Request $request): ?RedirectResponse
     {
         $repository = $this->resolver->resolve();
-        $detours = $repository->all();
-
         $normalizedPath = '/'.ltrim($request->path(), '/');
+        $detours = $repository->allRedirectCandidates($normalizedPath);
 
         foreach ($detours as $detour) {
             if (! $this->appliesToCurrentSite($detour->sites)) {
@@ -57,7 +56,7 @@ class HandleDetour implements HandlesDetour
             return @preg_match($from, $normalizedPath) === 1;
         }
 
-        return '/'.ltrim($from, '/') === $normalizedPath;
+        return $from === $normalizedPath;
     }
 
     public static function bind(): void

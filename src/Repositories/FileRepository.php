@@ -31,6 +31,28 @@ class FileRepository extends BaseRepository
             ->all();
     }
 
+    public function allRedirectCandidates(string $normalizedPath): array
+    {
+        return collect(File::allFiles($this->path))
+            ->filter(fn (SplFileInfo $file): bool =>
+            str($file->getFilename())->endsWith('.yaml')
+            )
+            ->map(function (SplFileInfo $file): ?Detour {
+                $id = pathinfo($file->getFilename(), PATHINFO_FILENAME);
+
+                return $this->find($id);
+            })
+            ->filter(function (Detour $detour) use ($normalizedPath): bool {
+                if ($detour->type === 'regex') {
+                    return true;
+                }
+
+                return '/' . ltrim($detour->from, '/') === $normalizedPath;
+            })
+            ->mapWithKeys(fn (Detour $detour) => [$detour->id => $detour])
+            ->all();
+    }
+
     public function find(string $id): ?Detour
     {
         $file = $this->filePath($id);
@@ -47,6 +69,12 @@ class FileRepository extends BaseRepository
     public function store(Form $form): Detour
     {
         $data = $form->toArray();
+
+        if ($data['type'] === 'path') {
+            $data['from'] = '/' . ltrim($data['from'], '/');
+            $data['to'] = '/' . ltrim($data['to'], '/');
+        }
+
         $id = Str::uuid()->toString();
         $file = $this->filePath($id);
 

@@ -10,6 +10,8 @@ abstract class BaseRepository
     /** @return array<string, Detour> */
     abstract public function all(): array;
 
+    abstract public function allRedirectCandidates(string $normalizedPath): array;
+
     abstract public function find(string $id): ?Detour;
 
     abstract public function store(Form $form): Detour;
