@@ -5,7 +5,8 @@ namespace JustBetter\Detour\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use JustBetter\Detour\Contracts\ResolvesRepository;
-use Statamic\Facades\Site;
+use Statamic\Facades\Site as SiteFacade;
+use Statamic\Sites\Site;
 use Symfony\Component\HttpFoundation\Response;
 
 class RedirectIfNeeded
@@ -15,12 +16,20 @@ class RedirectIfNeeded
         $repository = app(ResolvesRepository::class)->resolve();
         $detours = $repository->all();
 
+        /** @var array<int, array{
+         *   from: string,
+         *   to: string,
+         *   type: string,
+         *   code: int|string,
+         *   sites?: array<int, string>|null
+         * }> $detours
+         */
         foreach ($detours as $detour) {
             if (! $this->matchesRoute($detour['from'], $request->path(), $detour['type'])) {
                 continue;
             }
 
-            if (! $this->includesCurrentSite($detour['sites'])) {
+            if (! $this->includesCurrentSite($detour['sites'] ?? null)) {
                 continue;
             }
 
@@ -30,29 +39,41 @@ class RedirectIfNeeded
         return $next($request);
     }
 
-    protected function matchesRoute(string $from, string $currentPath, string $type): bool {
+    protected function matchesRoute(string $from, string $currentPath, string $type): bool
+    {
         $normalizedPath = '/'.ltrim($currentPath, '/');
 
         if ($type === 'regex') {
             return $this->matchesPattern($from, $normalizedPath);
         }
 
-        $normalizedFrom = '/' . ltrim($from, '/');
+        $normalizedFrom = '/'.ltrim($from, '/');
 
         return $normalizedFrom === $normalizedPath;
     }
 
-    protected function includesCurrentSite(?array $sites): bool {
+    /**
+     * @param  array<int, string>|null  $sites
+     */
+    protected function includesCurrentSite(?array $sites): bool
+    {
         if (empty($sites)) {
             return true;
         }
 
-        $currentSiteHandle = Site::current()?->handle();
+        /** @var Site $site */
+        $site = SiteFacade::current();
+        $currentSiteHandle = $site->handle();
+
         return in_array($currentSiteHandle, $sites, true);
     }
 
-    protected function matchesPattern(string $pattern, string $currentPath): bool {
-        $result = @preg_match($pattern, $currentPath);
-        return $result === 1;
+    protected function matchesPattern(string $pattern, string $currentPath): bool
+    {
+        try {
+            return preg_match($pattern, $currentPath) !== false;
+        } catch (\Throwable) {
+            return false;
+        }
     }
 }

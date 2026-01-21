@@ -38,6 +38,7 @@
         "test": "phpunit",
         "analyse": "phpstan --memory-limit=1G",
         "style": "pint --test",
+        "style:fix": "pint",
         "coverage": "XDEBUG_MODE=coverage php vendor/bin/pest --coverage --min=93",
         "quality": [
             "@test",
