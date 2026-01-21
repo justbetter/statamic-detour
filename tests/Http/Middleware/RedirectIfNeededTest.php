@@ -23,7 +23,7 @@ class RedirectIfNeededTest extends TestCase
     }
 
     #[Test]
-    public function it_can_redirect(): void
+    public function it_redirects_when_a_path_detour_matches(): void
     {
         DetourModel::create([
             'from' => '/::from::',
@@ -38,7 +38,21 @@ class RedirectIfNeededTest extends TestCase
     }
 
     #[Test]
-    public function it_allows_request_when_no_detour_exists(): void
+    public function it_redirects_when_from_path_is_missing_a_leading_slash(): void {
+        DetourModel::create([
+            'from' => '::from::',
+            'to' => '::to::',
+            'code' => '301',
+            'type' => '::path::',
+        ]);
+
+        $this->get('/::from::')
+            ->assertRedirect('/::to::')
+            ->assertStatus(301);
+    }
+
+    #[Test]
+    public function it_does_not_redirect_when_no_detour_exists(): void
     {
         $response = $this->get('/::from::');
         $response->assertStatus(200);
@@ -52,7 +66,7 @@ class RedirectIfNeededTest extends TestCase
             'to' => '/::to::',
             'type' => 'path',
             'code' => '301',
-            'sites' => ['other-site'],
+            'sites' => ['::site::'],
         ]);
 
         $this->get('/::from::')
@@ -61,7 +75,7 @@ class RedirectIfNeededTest extends TestCase
     }
 
     #[Test]
-    public function it_allows_request_when_detour_exists_but_not_for_requested_route(): void
+    public function it_does_not_redirect_when_detour_exists_but_not_for_requested_route(): void
     {
         DetourModel::create([
             'from' => '/::from::',
@@ -77,7 +91,7 @@ class RedirectIfNeededTest extends TestCase
     }
 
     #[Test]
-    public function it_allows_redirecting_through_a_regex(): void
+    public function it_redirects_when_the_from_pattern_is_a_matching_regex(): void
     {
         DetourModel::create([
             'from' => '#^/from#',
@@ -93,7 +107,7 @@ class RedirectIfNeededTest extends TestCase
     }
 
     #[Test]
-    public function it_does_not_break_with_a_faulty_regex(): void
+    public function it_does_not_redirect_when_the_regex_is_invalid(): void
     {
         DetourModel::create([
             'from' => '[a-z',
