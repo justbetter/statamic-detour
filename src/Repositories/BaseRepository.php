@@ -7,9 +7,7 @@ use JustBetter\Detour\Data\Form;
 
 abstract class BaseRepository
 {
-    /**
-     * @return array<string, Detour>
-     */
+    /** @return array<string, Detour> */
     abstract public function all(): array;
 
     abstract public function find(string $id): ?Detour;

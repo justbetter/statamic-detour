@@ -10,15 +10,12 @@ class EloquentRepository extends BaseRepository
 {
     public function all(): array
     {
-        /** @var array<string, Detour> $detours */
-        $detours = DetourModel::query()
+        return DetourModel::query()
             ->get()
             ->mapWithKeys(function (DetourModel $detour): array {
                 return [$detour->id => Detour::make($detour->toArray())];
             })
-            ->toArray();
-
-        return $detours;
+            ->all();
     }
 
     public function find(string $id): Detour

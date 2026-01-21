@@ -20,8 +20,7 @@ class FileRepository extends BaseRepository
 
     public function all(): array
     {
-        /** @var array<string, Detour> $detours */
-        $detours = collect(File::allFiles($this->path))
+        return collect(File::allFiles($this->path))
             ->filter(fn (SplFileInfo $file): bool => str($file->getFilename())->endsWith('.yaml'))
             ->mapWithKeys(function (SplFileInfo $file): array {
                 $id = pathinfo($file->getFilename(), PATHINFO_FILENAME);
@@ -29,9 +28,7 @@ class FileRepository extends BaseRepository
                 return [$id => $this->find($id)];
             })
             ->filter()
-            ->toArray();
-
-        return $detours;
+            ->all();
     }
 
     public function find(string $id): ?Detour

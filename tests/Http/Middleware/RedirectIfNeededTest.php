@@ -2,7 +2,7 @@
 
 namespace JustBetter\Detour\Tests\Http\Middleware;
 
-use JustBetter\Detour\Models\Detour as DetourModel;
+use JustBetter\Detour\Models\Detour;
 use JustBetter\Detour\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -25,7 +25,7 @@ class RedirectIfNeededTest extends TestCase
     #[Test]
     public function it_redirects_when_a_path_detour_matches(): void
     {
-        DetourModel::create([
+        Detour::create([
             'from' => '/::from::',
             'to' => '/::to::',
             'code' => '301',
@@ -40,7 +40,7 @@ class RedirectIfNeededTest extends TestCase
     #[Test]
     public function it_redirects_when_from_path_is_missing_a_leading_slash(): void
     {
-        DetourModel::create([
+        Detour::create([
             'from' => '::from::',
             'to' => '::to::',
             'code' => '301',
@@ -62,7 +62,7 @@ class RedirectIfNeededTest extends TestCase
     #[Test]
     public function it_does_not_redirect_when_detour_exists_but_not_for_current_site(): void
     {
-        DetourModel::create([
+        Detour::create([
             'from' => '/::from::',
             'to' => '/::to::',
             'type' => 'path',
@@ -78,7 +78,7 @@ class RedirectIfNeededTest extends TestCase
     #[Test]
     public function it_does_not_redirect_when_detour_exists_but_not_for_requested_route(): void
     {
-        DetourModel::create([
+        Detour::create([
             'from' => '/::from::',
             'to' => '/::to::',
             'type' => 'path',
@@ -94,7 +94,7 @@ class RedirectIfNeededTest extends TestCase
     #[Test]
     public function it_redirects_when_the_from_pattern_is_a_matching_regex(): void
     {
-        DetourModel::create([
+        Detour::create([
             'from' => '#^/from#',
             'to' => '/::to::',
             'type' => 'regex',
@@ -110,7 +110,7 @@ class RedirectIfNeededTest extends TestCase
     #[Test]
     public function it_does_not_redirect_when_the_regex_is_invalid(): void
     {
-        DetourModel::create([
+        Detour::create([
             'from' => '[a-z',
             'to' => '/::to::',
             'type' => 'regex',
