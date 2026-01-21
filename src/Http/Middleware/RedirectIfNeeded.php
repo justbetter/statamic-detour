@@ -20,7 +20,7 @@ class RedirectIfNeeded
                 continue;
             }
 
-            if (! $this->includesCurrentSide($detour['sites'])) {
+            if (! $this->includesCurrentSite($detour['sites'])) {
                 continue;
             }
 
@@ -42,7 +42,7 @@ class RedirectIfNeeded
         return $normalizedFrom === $normalizedPath;
     }
 
-    protected function includesCurrentSide(array $sites): bool {
+    protected function includesCurrentSite(?array $sites): bool {
         if (empty($sites)) {
             return true;
         }
@@ -52,6 +52,7 @@ class RedirectIfNeeded
     }
 
     protected function matchesPattern(string $pattern, string $currentPath): bool {
-        return preg_match($pattern, $currentPath) === 1;
+        $result = @preg_match($pattern, $currentPath);
+        return $result === 1;
     }
 }
