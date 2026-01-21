@@ -16,6 +16,8 @@ class RedirectIfNeeded
         $repository = app(ResolvesRepository::class)->resolve();
         $detours = $repository->all();
 
+        $normalizedPath = '/'.ltrim($request->path(), '/');
+
         /** @var array<int, array{
          *   from: string,
          *   to: string,
@@ -25,11 +27,11 @@ class RedirectIfNeeded
          * }> $detours
          */
         foreach ($detours as $detour) {
-            if (! $this->includesCurrentSite($detour['sites'] ?? null)) {
+            if (! $this->shouldApplyToCurrentSite($detour['sites'] ?? null)) {
                 continue;
             }
 
-            if (! $this->matchesRoute($detour['from'], $request->path(), $detour['type'])) {
+            if (! $this->matchesRoute($detour['from'], $normalizedPath, $detour['type'])) {
                 continue;
             }
 
@@ -39,10 +41,8 @@ class RedirectIfNeeded
         return $next($request);
     }
 
-    protected function matchesRoute(string $from, string $currentPath, string $type): bool
+    protected function matchesRoute(string $from, string $normalizedPath, string $type): bool
     {
-        $normalizedPath = '/'.ltrim($currentPath, '/');
-
         if ($type === 'regex') {
             return $this->matchesPattern($from, $normalizedPath);
         }
@@ -55,7 +55,7 @@ class RedirectIfNeeded
     /**
      * @param  array<int, string>|null  $sites
      */
-    protected function includesCurrentSite(?array $sites): bool
+    protected function shouldApplyToCurrentSite(?array $sites): bool
     {
         if (empty($sites)) {
             return true;
