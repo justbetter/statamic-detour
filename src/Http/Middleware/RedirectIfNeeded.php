@@ -25,11 +25,11 @@ class RedirectIfNeeded
          * }> $detours
          */
         foreach ($detours as $detour) {
-            if (! $this->matchesRoute($detour['from'], $request->path(), $detour['type'])) {
+            if (! $this->includesCurrentSite($detour['sites'] ?? null)) {
                 continue;
             }
 
-            if (! $this->includesCurrentSite($detour['sites'] ?? null)) {
+            if (! $this->matchesRoute($detour['from'], $request->path(), $detour['type'])) {
                 continue;
             }
 
@@ -71,7 +71,7 @@ class RedirectIfNeeded
     protected function matchesPattern(string $pattern, string $currentPath): bool
     {
         try {
-            return preg_match($pattern, $currentPath) !== false;
+            return preg_match($pattern, $currentPath) === 1;
         } catch (\Throwable) {
             return false;
         }
