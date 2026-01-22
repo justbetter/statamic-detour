@@ -38,7 +38,7 @@ class EloquentDetourRepositoryTest extends TestCase
         $contract = app(ResolveRepository::class);
         $repository = $contract->resolve();
 
-        $all = $repository->all();
+        $all = $repository->get();
 
         $this->assertCount(2, $all);
     }

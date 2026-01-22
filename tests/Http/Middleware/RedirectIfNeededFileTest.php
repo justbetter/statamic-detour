@@ -37,8 +37,8 @@ class RedirectIfNeededFileTest extends TestCase
         $repository = $contract->resolve();
 
         $data = Form::make([
-            'from' => '::from::',
-            'to' => '::to::',
+            'from' => '/::from::',
+            'to' => '/::to::',
             'code' => '301',
             'type' => 'path',
         ]);

@@ -2,10 +2,9 @@
 
 namespace JustBetter\Detour\Contracts;
 
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+use JustBetter\Detour\Data\Detour;
 
 interface HandlesDetour
 {
-    public function resolveRedirect(Request $request): ?RedirectResponse;
+    public function handle(string $normalizedPath): ?Detour;
 }

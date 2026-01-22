@@ -45,7 +45,7 @@ class FileDetourRepositoryTest extends TestCase
 
         $repository->store($data);
 
-        $all = $repository->all();
+        $all = $repository->get();
 
         $this->assertCount(1, $all);
     }

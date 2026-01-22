@@ -15,6 +15,14 @@ class RedirectIfNeeded
 
     public function handle(Request $request, Closure $next): Response
     {
-        return $this->handler->resolveRedirect($request) ?? $next($request);
+        $normalizedPath = '/'.ltrim($request->path(), '/');
+
+        $applicableDetour = $this->handler->handle($normalizedPath);
+
+        if ($applicableDetour) {
+            return redirect()->to($applicableDetour->to, $applicableDetour->code);
+        }
+
+        return $next($request);
     }
 }

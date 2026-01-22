@@ -2,8 +2,6 @@
 
 namespace JustBetter\Detour\Tests\Http\Middleware;
 
-use JustBetter\Detour\Actions\ResolveRepository;
-use JustBetter\Detour\Data\Form;
 use JustBetter\Detour\Models\Detour;
 use JustBetter\Detour\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
@@ -33,26 +31,6 @@ class RedirectIfNeededEloquentTest extends TestCase
             'code' => '301',
             'type' => 'path',
         ]);
-
-        $this->get('/::from::')
-            ->assertRedirect('/::to::')
-            ->assertStatus(301);
-    }
-
-    #[Test]
-    public function it_redirects_when_from_path_is_missing_a_leading_slash(): void
-    {
-        $contract = app(ResolveRepository::class);
-        $repository = $contract->resolve();
-
-        $data = Form::make([
-            'from' => '::from::',
-            'to' => '::to::',
-            'code' => '301',
-            'type' => 'path',
-        ]);
-
-        $repository->store($data);
 
         $this->get('/::from::')
             ->assertRedirect('/::to::')

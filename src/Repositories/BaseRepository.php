@@ -5,17 +5,15 @@ namespace JustBetter\Detour\Repositories;
 use Illuminate\Pagination\LengthAwarePaginator;
 use JustBetter\Detour\Data\Detour;
 use JustBetter\Detour\Data\Form;
+use JustBetter\Detour\Models\DetourFilter;
 
 abstract class BaseRepository
 {
     /** @return array<string, Detour> */
-    abstract public function all(): array;
+    abstract public function get(?DetourFilter $filter = null): array;
 
     /** @return LengthAwarePaginator<string, Detour> */
     abstract public function paginate(int $perPage, ?int $page = null): LengthAwarePaginator;
-
-    /** @return array<string, Detour> */
-    abstract public function findCandidates(string $normalizedPath): array;
 
     abstract public function find(string $id): ?Detour;
 

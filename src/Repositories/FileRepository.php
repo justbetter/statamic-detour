@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use JustBetter\Detour\Data\Detour;
 use JustBetter\Detour\Data\Form;
+use JustBetter\Detour\Models\DetourFilter;
 use Statamic\Facades\YAML;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -21,9 +22,34 @@ class FileRepository extends BaseRepository
         File::ensureDirectoryExists($this->path);
     }
 
-    public function all(): array
+    public function get(?DetourFilter $filter = null): array
     {
-        return $this->detours()->all();
+        $query = $this->detours();
+        $normalizedPath = $filter->normalizedPath ?? null;
+
+        if ($normalizedPath) {
+            $query
+                ->filter(function (?Detour $detour) use ($normalizedPath): bool {
+                    if ($detour === null) {
+                        return false;
+                    }
+
+                    if ($detour->type === 'regex') {
+                        return true;
+                    }
+
+                    return '/'.ltrim($detour->from, '/') === $normalizedPath;
+                })
+                ->mapWithKeys(function (?Detour $detour): array {
+                    if ($detour === null) {
+                        return [];
+                    }
+
+                    return [$detour->id => $detour];
+                });
+        }
+
+        return $query->all();
     }
 
     public function paginate(int $perPage, ?int $page = null): LengthAwarePaginator
@@ -43,30 +69,6 @@ class FileRepository extends BaseRepository
         );
     }
 
-    public function findCandidates(string $normalizedPath): array
-    {
-        return $this->detours()
-            ->filter(function (?Detour $detour) use ($normalizedPath): bool {
-                if ($detour === null) {
-                    return false;
-                }
-
-                if ($detour->type === 'regex') {
-                    return true;
-                }
-
-                return '/'.ltrim($detour->from, '/') === $normalizedPath;
-            })
-            ->mapWithKeys(function (?Detour $detour): array {
-                if ($detour === null) {
-                    return [];
-                }
-
-                return [$detour->id => $detour];
-            })
-            ->all();
-    }
-
     public function find(string $id): ?Detour
     {
         $file = $this->filePath($id);
@@ -83,11 +85,6 @@ class FileRepository extends BaseRepository
     public function store(Form $form): Detour
     {
         $data = $form->toArray();
-
-        if ($data['type'] === 'path') {
-            $data['from'] = '/'.ltrim($form->from, '/');
-            $data['to'] = '/'.ltrim($form->to, '/');
-        }
 
         $id = Str::uuid()->toString();
         $file = $this->filePath($id);

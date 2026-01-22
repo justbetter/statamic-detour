@@ -7,17 +7,28 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use JustBetter\Detour\Data\Detour;
 use JustBetter\Detour\Data\Form;
 use JustBetter\Detour\Models\Detour as DetourModel;
+use JustBetter\Detour\Models\DetourFilter;
 
 class EloquentRepository extends BaseRepository
 {
-    public function all(): array
+    public function get(?DetourFilter $filter = null): array
     {
-        return DetourModel::query()
-            ->get()
-            ->mapWithKeys(function (DetourModel $detour): array {
-                return [$detour->id => Detour::make($detour->toArray())];
-            })
-            ->all();
+        $query = DetourModel::query();
+
+        $normalizedPath = $filter->normalizedPath ?? null;
+
+        if ($normalizedPath) {
+            $query->where(function (Builder $query) use ($normalizedPath): void {
+                $query
+                    ->where(function (Builder $query) use ($normalizedPath): void {
+                        $query->where('type', 'path')
+                            ->where('from', $normalizedPath);
+                    })
+                    ->orWhere('type', 'regex');
+            });
+        }
+
+        return $query->get()->mapWithKeys(fn (DetourModel $model) => [$model->id => Detour::make($model->toArray())])->all();
     }
 
     public function paginate(int $perPage, ?int $page = null): LengthAwarePaginator
@@ -36,24 +47,6 @@ class EloquentRepository extends BaseRepository
         );
     }
 
-    public function findCandidates(string $normalizedPath): array
-    {
-        return DetourModel::query()
-            ->where(function (Builder $query) use ($normalizedPath): void {
-                $query
-                    ->where(function (Builder $query) use ($normalizedPath): void {
-                        $query->where('type', 'path')
-                            ->where('from', $normalizedPath);
-                    })
-                    ->orWhere('type', 'regex');
-            })
-            ->get()
-            ->mapWithKeys(fn (DetourModel $model) => [
-                $model->id => Detour::make($model->toArray()),
-            ])
-            ->all();
-    }
-
     public function find(string $id): Detour
     {
         $model = DetourModel::findOrFail($id);
@@ -64,11 +57,6 @@ class EloquentRepository extends BaseRepository
     public function store(Form $form): Detour
     {
         $data = $form->toArray();
-
-        if ($data['type'] === 'path') {
-            $data['from'] = '/'.ltrim($form->from, '/');
-            $data['to'] = '/'.ltrim($form->to, '/');
-        }
 
         $model = DetourModel::query()->create($data);
 
