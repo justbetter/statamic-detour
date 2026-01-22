@@ -4,14 +4,12 @@ namespace JustBetter\Detour\Repositories;
 
 use JustBetter\Detour\Data\Detour;
 use JustBetter\Detour\Data\Form;
+use JustBetter\Detour\Models\DetourFilter;
 
 abstract class BaseRepository
 {
     /** @return array<string, Detour> */
-    abstract public function all(): array;
-
-    /** @return array<string, Detour> */
-    abstract public function findCandidates(string $normalizedPath): array;
+    abstract public function get(?DetourFilter $filter = null): array;
 
     abstract public function find(string $id): ?Detour;
 

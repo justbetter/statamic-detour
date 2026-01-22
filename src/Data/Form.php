@@ -11,7 +11,4 @@ namespace JustBetter\Detour\Data;
  *
  * @extends Data<string, mixed>
  */
-class Form extends Data
-{
-    //
-}
+class Form extends Data {}

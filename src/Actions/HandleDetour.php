@@ -2,22 +2,23 @@
 
 namespace JustBetter\Detour\Actions;
 
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use JustBetter\Detour\Contracts\HandlesDetour;
 use JustBetter\Detour\Contracts\ResolvesRepository;
+use JustBetter\Detour\Data\Detour;
+use JustBetter\Detour\Models\DetourFilter;
 use Statamic\Facades\Site as SiteFacade;
 use Statamic\Sites\Site;
 
 class HandleDetour implements HandlesDetour
 {
-    public function __construct(private ResolvesRepository $resolver) {}
+    public function __construct(protected ResolvesRepository $resolver) {}
 
-    public function resolveRedirect(Request $request): ?RedirectResponse
+    public function handle(string $normalizedPath): ?Detour
     {
         $repository = $this->resolver->resolve();
-        $normalizedPath = '/'.ltrim($request->path(), '/');
-        $detours = $repository->findCandidates($normalizedPath);
+
+        $filter = new DetourFilter(normalizedPath: $normalizedPath);
+        $detours = $repository->get($filter);
 
         foreach ($detours as $detour) {
             if (! $this->appliesToCurrentSite($detour->sites)) {
@@ -28,7 +29,7 @@ class HandleDetour implements HandlesDetour
                 continue;
             }
 
-            return redirect()->to($detour->to, $detour->code);
+            return $detour;
         }
 
         return null;
