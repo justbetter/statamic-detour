@@ -8,7 +8,7 @@ use JustBetter\Detour\Models\Detour;
 use JustBetter\Detour\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
-class RedirectIfNeededTest extends TestCase
+class RedirectIfNeededEloquentTest extends TestCase
 {
     protected function defineEnvironment($app): void
     {

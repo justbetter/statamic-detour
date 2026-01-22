@@ -48,8 +48,8 @@ class EloquentRepository extends BaseRepository
         $data = $form->toArray();
 
         if ($data['type'] === 'path') {
-            $data['from'] = '/' . ltrim($data['from'], '/');
-            $data['to'] = '/' . ltrim($data['to'], '/');
+            $data['from'] = '/'.ltrim($form->from, '/');
+            $data['to'] = '/'.ltrim($form->to, '/');
         }
 
         $model = DetourModel::query()->create($data);

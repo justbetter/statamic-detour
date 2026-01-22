@@ -22,11 +22,7 @@ class FileRepository extends BaseRepository
     {
         return collect(File::allFiles($this->path))
             ->filter(fn (SplFileInfo $file): bool => str($file->getFilename())->endsWith('.yaml'))
-            ->mapWithKeys(function (SplFileInfo $file): array {
-                $id = pathinfo($file->getFilename(), PATHINFO_FILENAME);
-
-                return [$id => $this->find($id)];
-            })
+            ->map(fn (SplFileInfo $file): ?Detour => $this->detourByFile($file))
             ->filter()
             ->all();
     }
@@ -34,22 +30,25 @@ class FileRepository extends BaseRepository
     public function allRedirectCandidates(string $normalizedPath): array
     {
         return collect(File::allFiles($this->path))
-            ->filter(fn (SplFileInfo $file): bool =>
-            str($file->getFilename())->endsWith('.yaml')
-            )
-            ->map(function (SplFileInfo $file): ?Detour {
-                $id = pathinfo($file->getFilename(), PATHINFO_FILENAME);
-
-                return $this->find($id);
-            })
-            ->filter(function (Detour $detour) use ($normalizedPath): bool {
+            ->filter(fn (SplFileInfo $file): bool => str($file->getFilename())->endsWith('.yaml'))
+            ->map(fn (SplFileInfo $file): ?Detour => $this->detourByFile($file))
+            ->filter(function (?Detour $detour) use ($normalizedPath): bool {
+                if ($detour === null) {
+                    return false;
+                }
                 if ($detour->type === 'regex') {
                     return true;
                 }
 
-                return '/' . ltrim($detour->from, '/') === $normalizedPath;
+                return '/'.ltrim($detour->from, '/') === $normalizedPath;
             })
-            ->mapWithKeys(fn (Detour $detour) => [$detour->id => $detour])
+            ->mapWithKeys(function (?Detour $detour): array {
+                if ($detour === null) {
+                    return [];
+                }
+
+                return [$detour->id => $detour];
+            })
             ->all();
     }
 
@@ -71,8 +70,8 @@ class FileRepository extends BaseRepository
         $data = $form->toArray();
 
         if ($data['type'] === 'path') {
-            $data['from'] = '/' . ltrim($data['from'], '/');
-            $data['to'] = '/' . ltrim($data['to'], '/');
+            $data['from'] = '/'.ltrim($form->from, '/');
+            $data['to'] = '/'.ltrim($form->to, '/');
         }
 
         $id = Str::uuid()->toString();
@@ -96,6 +95,13 @@ class FileRepository extends BaseRepository
     protected function filePath(string $id): string
     {
         return rtrim($this->path, '/')."/{$id}.yaml";
+    }
+
+    protected function detourByFile(SplFileInfo $file): ?Detour
+    {
+        $id = pathinfo($file->getFilename(), PATHINFO_FILENAME);
+
+        return $this->find($id);
     }
 
     public static function bind(): void
