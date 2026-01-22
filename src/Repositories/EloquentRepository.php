@@ -2,6 +2,7 @@
 
 namespace JustBetter\Detour\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
 use JustBetter\Detour\Data\Detour;
 use JustBetter\Detour\Data\Form;
 use JustBetter\Detour\Models\Detour as DetourModel;
@@ -18,13 +19,13 @@ class EloquentRepository extends BaseRepository
             ->all();
     }
 
-    public function allRedirectCandidates(string $normalizedPath): array
+    public function findCandidates(string $normalizedPath): array
     {
         return DetourModel::query()
-            ->where(function ($query) use ($normalizedPath) {
+            ->where(function (Builder $query) use ($normalizedPath): void {
                 $query
-                    ->where(function ($q) use ($normalizedPath) {
-                        $q->where('type', 'path')
+                    ->where(function (Builder $query) use ($normalizedPath): void {
+                        $query->where('type', 'path')
                             ->where('from', $normalizedPath);
                     })
                     ->orWhere('type', 'regex');

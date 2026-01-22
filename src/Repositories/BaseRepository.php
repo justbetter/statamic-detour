@@ -11,7 +11,7 @@ abstract class BaseRepository
     abstract public function all(): array;
 
     /** @return array<string, Detour> */
-    abstract public function allRedirectCandidates(string $normalizedPath): array;
+    abstract public function findCandidates(string $normalizedPath): array;
 
     abstract public function find(string $id): ?Detour;
 

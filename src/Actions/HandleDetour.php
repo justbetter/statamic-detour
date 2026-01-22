@@ -17,7 +17,7 @@ class HandleDetour implements HandlesDetour
     {
         $repository = $this->resolver->resolve();
         $normalizedPath = '/'.ltrim($request->path(), '/');
-        $detours = $repository->allRedirectCandidates($normalizedPath);
+        $detours = $repository->findCandidates($normalizedPath);
 
         foreach ($detours as $detour) {
             if (! $this->appliesToCurrentSite($detour->sites)) {

@@ -3,6 +3,7 @@
 namespace JustBetter\Detour\Repositories;
 
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use JustBetter\Detour\Data\Detour;
@@ -20,22 +21,17 @@ class FileRepository extends BaseRepository
 
     public function all(): array
     {
-        return collect(File::allFiles($this->path))
-            ->filter(fn (SplFileInfo $file): bool => str($file->getFilename())->endsWith('.yaml'))
-            ->map(fn (SplFileInfo $file): ?Detour => $this->detourByFile($file))
-            ->filter()
-            ->all();
+        return $this->detours()->all();
     }
 
-    public function allRedirectCandidates(string $normalizedPath): array
+    public function findCandidates(string $normalizedPath): array
     {
-        return collect(File::allFiles($this->path))
-            ->filter(fn (SplFileInfo $file): bool => str($file->getFilename())->endsWith('.yaml'))
-            ->map(fn (SplFileInfo $file): ?Detour => $this->detourByFile($file))
+        return $this->detours()
             ->filter(function (?Detour $detour) use ($normalizedPath): bool {
                 if ($detour === null) {
                     return false;
                 }
+
                 if ($detour->type === 'regex') {
                     return true;
                 }
@@ -90,6 +86,18 @@ class FileRepository extends BaseRepository
         if (File::exists($file)) {
             File::delete($file);
         }
+    }
+
+    /**
+     * @return Collection<string, Detour>
+     */
+    protected function detours(): Collection
+    {
+        return collect(File::allFiles($this->path))
+            ->filter(fn (SplFileInfo $file) => str($file->getFilename())->endsWith('.yaml')
+            )
+            ->map(fn (SplFileInfo $file) => $this->detourByFile($file))
+            ->filter();
     }
 
     protected function filePath(string $id): string
