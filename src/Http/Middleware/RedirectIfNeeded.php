@@ -15,10 +15,6 @@ class RedirectIfNeeded
 
     public function handle(Request $request, Closure $next): Response
     {
-        if ($response = $this->handler->resolveRedirect($request)) {
-            return $response;
-        }
-
-        return $next($request);
+        return $this->handler->resolveRedirect($request) ?? $next($request);
     }
 }
