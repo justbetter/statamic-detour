@@ -3,9 +3,7 @@
 namespace JustBetter\Detour\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use JustBetter\Detour\Database\Factories\DetourFactory;
 
 /**
  * @property string $id
@@ -17,9 +15,6 @@ use JustBetter\Detour\Database\Factories\DetourFactory;
  */
 class Detour extends Model
 {
-    /** @use HasFactory<DetourFactory> */
-    use HasFactory;
-
     use HasUuids;
 
     protected $guarded = [];
@@ -31,10 +26,5 @@ class Detour extends Model
         return [
             'sites' => 'array',
         ];
-    }
-
-    protected static function newFactory(): DetourFactory
-    {
-        return DetourFactory::new();
     }
 }
