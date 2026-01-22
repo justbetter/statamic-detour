@@ -3,6 +3,8 @@
 namespace JustBetter\Detour\Repositories;
 
 use Illuminate\Foundation\Application;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -22,6 +24,23 @@ class FileRepository extends BaseRepository
     public function all(): array
     {
         return $this->detours()->all();
+    }
+
+    public function paginate(int $perPage, ?int $page = null): LengthAwarePaginator
+    {
+        $page = $page ?: LengthAwarePaginator::resolveCurrentPage();
+        $detours = $this->detours();
+
+        return new LengthAwarePaginator(
+            $detours->forPage($page, $perPage),
+            $detours->count(),
+            $perPage,
+            $page,
+            [
+                'path' => Paginator::resolveCurrentPath(),
+                'pageName' => 'page',
+            ]
+        );
     }
 
     public function findCandidates(string $normalizedPath): array

@@ -3,6 +3,7 @@
 namespace JustBetter\Detour\Repositories;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
 use JustBetter\Detour\Data\Detour;
 use JustBetter\Detour\Data\Form;
 use JustBetter\Detour\Models\Detour as DetourModel;
@@ -17,6 +18,22 @@ class EloquentRepository extends BaseRepository
                 return [$detour->id => Detour::make($detour->toArray())];
             })
             ->all();
+    }
+
+    public function paginate(int $perPage, ?int $page = null): LengthAwarePaginator
+    {
+        $paginator = DetourModel::query()->paginate($perPage, ['*'], 'page', $page);
+
+        $collection = $paginator->getCollection()
+            ->mapWithKeys(fn (DetourModel $detour) => [$detour->id => Detour::make($detour->toArray())]);
+
+        return new LengthAwarePaginator(
+            $collection,
+            $paginator->total(),
+            $paginator->perPage(),
+            $paginator->currentPage(),
+            ['path' => $paginator->path(), 'pageName' => $paginator->getPageName()]
+        );
     }
 
     public function findCandidates(string $normalizedPath): array

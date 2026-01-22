@@ -49,4 +49,50 @@ class FileDetourRepositoryTest extends TestCase
 
         $this->assertCount(1, $all);
     }
+
+    #[Test]
+    public function it_can_paginate(): void
+    {
+        $contract = app(ResolveRepository::class);
+        $repository = $contract->resolve();
+
+        $data1 = Form::make([
+            'from' => '::from::',
+            'to' => '::to::',
+            'code' => '302',
+            'type' => '::path::',
+        ]);
+
+        $data2 = Form::make([
+            'from' => '::from-2::',
+            'to' => '::to-2::',
+            'code' => '302',
+            'type' => '::path::',
+        ]);
+
+        $data3 = Form::make([
+            'from' => '::from-3::',
+            'to' => '::to-3::',
+            'code' => '302',
+            'type' => '::path::',
+        ]);
+
+        $repository->store($data1);
+        $repository->store($data2);
+        $repository->store($data3);
+
+        $paginated = $repository->paginate(2, 1);
+
+        $this->assertSame(1, $paginated->currentPage());
+        $this->assertSame(2, $paginated->lastPage());
+        $this->assertSame(3, $paginated->total());
+        $this->assertCount(2, $paginated->items());
+
+        $paginated = $repository->paginate(2, 2);
+
+        $this->assertSame(2, $paginated->currentPage());
+        $this->assertSame(2, $paginated->lastPage());
+        $this->assertSame(3, $paginated->total());
+        $this->assertCount(1, $paginated->items());
+    }
 }

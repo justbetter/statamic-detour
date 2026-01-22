@@ -18,7 +18,12 @@ class ListDetours implements ListsDetours
 
         // @phpstan-ignore-next-line
         $oldDirectory = Blueprint::directory();
-        $values = $repository->all();
+
+        /** @var int $perPage */
+        $perPage = config('justbetter.statamic-detour.per_page', 10);
+
+        $paginated = $repository->paginate($perPage);
+        $values = $paginated->items();
 
         // @phpstan-ignore-next-line
         $blueprint = Blueprint::setDirectories(__DIR__.'/../../resources/blueprints')->find('detour');
@@ -35,7 +40,7 @@ class ListDetours implements ListsDetours
             'blueprint' => $blueprint->toPublishArray(),
             'values' => $fields->values(),
             'meta' => $fields->meta(),
-            'data' => $values,
+            'data' => $paginated,
             'action' => cp_route('justbetter.detours.store'),
         ];
     }
