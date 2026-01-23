@@ -3,9 +3,11 @@
 namespace JustBetter\Detour\Repositories;
 
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use JustBetter\Detour\Data\Detour;
+use JustBetter\Detour\Data\DetourFilter;
 use JustBetter\Detour\Data\Form;
 use Statamic\Facades\YAML;
 use Symfony\Component\Finder\SplFileInfo;
@@ -18,20 +20,23 @@ class FileRepository extends BaseRepository
         File::ensureDirectoryExists($this->path);
     }
 
-    public function all(): array
+    public function get(?DetourFilter $filter = null): array
     {
-        /** @var array<string, Detour> $detours */
-        $detours = collect(File::allFiles($this->path))
-            ->filter(fn (SplFileInfo $file): bool => str($file->getFilename())->endsWith('.yaml'))
-            ->mapWithKeys(function (SplFileInfo $file): array {
-                $id = pathinfo($file->getFilename(), PATHINFO_FILENAME);
+        return collect(File::allFiles($this->path))
+            ->filter(fn (SplFileInfo $file) => str($file->getFilename())->endsWith('.yaml'))
+            ->map(fn (SplFileInfo $file) => $this->detourByFile($file))
+            ->when($filter, function (Collection $detours, DetourFilter $filter) {
+                $detours->filter(function (?Detour $detour) use ($filter): bool {
+                    if (! $detour) {
+                        return false;
+                    }
 
-                return [$id => $this->find($id)];
+                    return $detour->type === 'regex' || $detour->from === $filter->path;
+                });
             })
             ->filter()
-            ->toArray();
-
-        return $detours;
+            ->mapWithKeys(fn (Detour $detour) => [$detour->id => $detour])
+            ->all();
     }
 
     public function find(string $id): ?Detour
@@ -50,6 +55,7 @@ class FileRepository extends BaseRepository
     public function store(Form $form): Detour
     {
         $data = $form->toArray();
+
         $id = Str::uuid()->toString();
         $file = $this->filePath($id);
 
@@ -71,6 +77,13 @@ class FileRepository extends BaseRepository
     protected function filePath(string $id): string
     {
         return rtrim($this->path, '/')."/{$id}.yaml";
+    }
+
+    protected function detourByFile(SplFileInfo $file): ?Detour
+    {
+        $id = pathinfo($file->getFilename(), PATHINFO_FILENAME);
+
+        return $this->find($id);
     }
 
     public static function bind(): void

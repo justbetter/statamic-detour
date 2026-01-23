@@ -2,23 +2,29 @@
 
 namespace JustBetter\Detour\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
 use JustBetter\Detour\Data\Detour;
+use JustBetter\Detour\Data\DetourFilter;
 use JustBetter\Detour\Data\Form;
 use JustBetter\Detour\Models\Detour as DetourModel;
 
 class EloquentRepository extends BaseRepository
 {
-    public function all(): array
+    public function get(?DetourFilter $filter = null): array
     {
-        /** @var array<string, Detour> $detours */
-        $detours = DetourModel::query()
-            ->get()
-            ->mapWithKeys(function (DetourModel $detour): array {
-                return [$detour->id => Detour::make($detour->toArray())];
+        return DetourModel::query()
+            ->when($filter, function (Builder $query, DetourFilter $filter) {
+                $query->where(function (Builder $query) use ($filter): void {
+                    $query->where(function (Builder $query) use ($filter): void {
+                        $query->where('type', 'path')
+                            ->where('from', $filter->path);
+                    })
+                        ->orWhere('type', 'regex');
+                });
             })
-            ->toArray();
-
-        return $detours;
+            ->get()
+            ->mapWithKeys(fn (DetourModel $model) => [$model->id => Detour::make($model->toArray())])
+            ->all();
     }
 
     public function find(string $id): Detour

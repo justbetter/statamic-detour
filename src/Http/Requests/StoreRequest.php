@@ -3,6 +3,7 @@
 namespace JustBetter\Detour\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * @property string $from
@@ -19,8 +20,19 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'from' => 'present|string',
-            'to' => 'present|string',
+            'from' => [
+                'present',
+                'string',
+                Rule::when($this->input('type') === 'path', ['starts_with:/']),
+                Rule::when($this->input('type') === 'regex', [
+                    function (string $attribute, mixed $value, \Closure $fail): void {
+                        if (! is_string($value) || @preg_match($value, '') === false) {
+                            $fail('The '.$attribute.' must be a valid regex.');
+                        }
+                    },
+                ]),
+            ],
+            'to' => 'present|string|starts_with:/',
             'type' => 'required|string|in:path,regex',
             'code' => 'required|integer',
             'sites' => 'present|array',

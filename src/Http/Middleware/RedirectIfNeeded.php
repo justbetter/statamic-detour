@@ -4,20 +4,24 @@ namespace JustBetter\Detour\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use JustBetter\Detour\Contracts\HandlesDetour;
 use Symfony\Component\HttpFoundation\Response;
 
 class RedirectIfNeeded
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
+    public function __construct(
+        private HandlesDetour $handler
+    ) {}
+
     public function handle(Request $request, Closure $next): Response
     {
-        // logic by Niek
-        // ophalen detours huidige site en huidige path OF regex
-        // redirect naar detour
+        $normalizedPath = '/'.ltrim($request->path(), '/');
+
+        $applicableDetour = $this->handler->handle($normalizedPath);
+
+        if ($applicableDetour) {
+            return redirect()->to($applicableDetour->to, $applicableDetour->code);
+        }
 
         return $next($request);
     }

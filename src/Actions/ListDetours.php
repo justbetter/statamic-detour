@@ -18,7 +18,7 @@ class ListDetours implements ListsDetours
 
         // @phpstan-ignore-next-line
         $oldDirectory = Blueprint::directory();
-        $values = $repository->all();
+        $values = $repository->get();
 
         // @phpstan-ignore-next-line
         $blueprint = Blueprint::setDirectories(__DIR__.'/../../resources/blueprints')->find('detour');

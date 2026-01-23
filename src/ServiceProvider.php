@@ -4,6 +4,7 @@ namespace JustBetter\Detour;
 
 use Illuminate\Routing\Router;
 use JustBetter\Detour\Actions\DeleteDetour;
+use JustBetter\Detour\Actions\HandleDetour;
 use JustBetter\Detour\Actions\ListDetours;
 use JustBetter\Detour\Actions\ResolveRepository;
 use JustBetter\Detour\Actions\StoreDetour;
@@ -50,6 +51,7 @@ class ServiceProvider extends AddonServiceProvider
         DeleteDetour::bind();
         ListDetours::bind();
         StoreDetour::bind();
+        HandleDetour::bind();
 
         FileRepository::bind();
 
