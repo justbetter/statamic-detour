@@ -41,6 +41,7 @@ class FileRepository extends BaseRepository
             ->all();
     }
 
+    //TODO: Pagination verwerken in het filter van de get method
     public function paginate(int $perPage, ?int $page = null): LengthAwarePaginator
     {
         $page = $page ?: LengthAwarePaginator::resolveCurrentPage();
