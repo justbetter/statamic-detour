@@ -5,30 +5,27 @@ namespace JustBetter\Detour\Repositories;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use JustBetter\Detour\Data\Detour;
+use JustBetter\Detour\Data\DetourFilter;
 use JustBetter\Detour\Data\Form;
 use JustBetter\Detour\Models\Detour as DetourModel;
-use JustBetter\Detour\Models\DetourFilter;
 
 class EloquentRepository extends BaseRepository
 {
     public function get(?DetourFilter $filter = null): array
     {
-        $query = DetourModel::query();
-
-        $normalizedPath = $filter->normalizedPath ?? null;
-
-        if ($normalizedPath) {
-            $query->where(function (Builder $query) use ($normalizedPath): void {
-                $query
-                    ->where(function (Builder $query) use ($normalizedPath): void {
+        return DetourModel::query()
+            ->when($filter, function (Builder $query, DetourFilter $filter) {
+                $query->where(function (Builder $query) use ($filter): void {
+                    $query->where(function (Builder $query) use ($filter): void {
                         $query->where('type', 'path')
-                            ->where('from', $normalizedPath);
+                            ->where('from', $filter->path);
                     })
-                    ->orWhere('type', 'regex');
-            });
-        }
-
-        return $query->get()->mapWithKeys(fn (DetourModel $model) => [$model->id => Detour::make($model->toArray())])->all();
+                        ->orWhere('type', 'regex');
+                });
+            })
+            ->get()
+            ->mapWithKeys(fn (DetourModel $model) => [$model->id => Detour::make($model->toArray())])
+            ->all();
     }
 
     public function paginate(int $perPage, ?int $page = null): LengthAwarePaginator

@@ -4,8 +4,8 @@ namespace JustBetter\Detour\Repositories;
 
 use Illuminate\Pagination\LengthAwarePaginator;
 use JustBetter\Detour\Data\Detour;
+use JustBetter\Detour\Data\DetourFilter;
 use JustBetter\Detour\Data\Form;
-use JustBetter\Detour\Models\DetourFilter;
 
 abstract class BaseRepository
 {

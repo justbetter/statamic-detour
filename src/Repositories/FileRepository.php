@@ -9,8 +9,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use JustBetter\Detour\Data\Detour;
+use JustBetter\Detour\Data\DetourFilter;
 use JustBetter\Detour\Data\Form;
-use JustBetter\Detour\Models\DetourFilter;
 use Statamic\Facades\YAML;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -24,32 +24,21 @@ class FileRepository extends BaseRepository
 
     public function get(?DetourFilter $filter = null): array
     {
-        $query = $this->detours();
-        $normalizedPath = $filter->normalizedPath ?? null;
-
-        if ($normalizedPath) {
-            $query
-                ->filter(function (?Detour $detour) use ($normalizedPath): bool {
-                    if ($detour === null) {
+        return collect(File::allFiles($this->path))
+            ->filter(fn (SplFileInfo $file) => str($file->getFilename())->endsWith('.yaml'))
+            ->map(fn (SplFileInfo $file) => $this->detourByFile($file))
+            ->when($filter, function (Collection $detours, DetourFilter $filter) {
+                $detours->filter(function (?Detour $detour) use ($filter): bool {
+                    if (! $detour) {
                         return false;
                     }
 
-                    if ($detour->type === 'regex') {
-                        return true;
-                    }
-
-                    return '/'.ltrim($detour->from, '/') === $normalizedPath;
-                })
-                ->mapWithKeys(function (?Detour $detour): array {
-                    if ($detour === null) {
-                        return [];
-                    }
-
-                    return [$detour->id => $detour];
+                    return $detour->type === 'regex' || $detour->from === $filter->path;
                 });
-        }
-
-        return $query->all();
+            })
+            ->filter()
+            ->mapWithKeys(fn (Detour $detour) => [$detour->id => $detour])
+            ->all();
     }
 
     public function paginate(int $perPage, ?int $page = null): LengthAwarePaginator
@@ -102,18 +91,6 @@ class FileRepository extends BaseRepository
         if (File::exists($file)) {
             File::delete($file);
         }
-    }
-
-    /**
-     * @return Collection<string, Detour>
-     */
-    protected function detours(): Collection
-    {
-        return collect(File::allFiles($this->path))
-            ->filter(fn (SplFileInfo $file) => str($file->getFilename())->endsWith('.yaml')
-            )
-            ->map(fn (SplFileInfo $file) => $this->detourByFile($file))
-            ->filter();
     }
 
     protected function filePath(string $id): string

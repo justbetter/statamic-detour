@@ -25,8 +25,8 @@ class DetourControllerTest extends TestCase
     public function it_can_store_data(): void
     {
         $response = $this->withoutMiddleware()->postJson(cp_route('justbetter.detours.store'), [
-            'from' => '::from::',
-            'to' => '::to::',
+            'from' => '/::from::',
+            'to' => '/::to::',
             'code' => '302',
             'type' => 'path',
             'sites' => [],
@@ -36,13 +36,41 @@ class DetourControllerTest extends TestCase
     }
 
     #[Test]
+    public function it_can_not_store_invalid_detours(): void
+    {
+        $response = $this->withoutMiddleware()->postJson(cp_route('justbetter.detours.store'), [
+            'from' => '::from::',
+            'to' => '::to::',
+            'code' => '302',
+            'type' => 'path',
+            'sites' => [],
+        ]);
+
+        $response->assertUnprocessable();
+        $response->assertJsonValidationErrors(['from']);
+        $response->assertJsonValidationErrors(['to']);
+
+        $response2 = $this->withoutMiddleware()->postJson(cp_route('justbetter.detours.store'), [
+            'from' => '::from::',
+            'to' => '/::to::',
+            'code' => '302',
+            'type' => 'regex',
+            'sites' => [],
+        ]);
+
+        $response2->assertUnprocessable();
+        $response2->assertJsonValidationErrors(['from']);
+        $response2->assertJsonMissingValidationErrors(['to']);
+    }
+
+    #[Test]
     public function it_can_destroy_data(): void
     {
         $contract = app(ResolveRepository::class);
         $repository = $contract->resolve();
         $data = [
-            'from' => '::from::',
-            'to' => '::to::',
+            'from' => '/::from::',
+            'to' => '/::to::',
             'code' => '302',
             'type' => 'path',
             'sites' => [],
