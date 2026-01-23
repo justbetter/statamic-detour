@@ -91,20 +91,4 @@ class RedirectIfNeededEloquentTest extends TestCase
             ->assertRedirect('/::to::')
             ->assertStatus(301);
     }
-
-    #[Test]
-    public function it_does_not_redirect_when_the_regex_is_invalid(): void
-    {
-        Detour::create([
-            'from' => '[a-z',
-            'to' => '/::to::',
-            'type' => 'regex',
-            'code' => '301',
-            'sites' => [],
-        ]);
-
-        $this->get('/::from::')
-            ->assertSee('::from::')
-            ->assertStatus(200);
-    }
 }

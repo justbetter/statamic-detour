@@ -52,15 +52,15 @@ class DetourControllerTest extends TestCase
 
         $response2 = $this->withoutMiddleware()->postJson(cp_route('justbetter.detours.store'), [
             'from' => '::from::',
-            'to' => '::to::',
+            'to' => '/::to::',
             'code' => '302',
             'type' => 'regex',
             'sites' => [],
         ]);
 
-        $response->assertUnprocessable();
-        $response2->assertJsonMissingValidationErrors(['from']);
-        $response->assertJsonValidationErrors(['to']);
+        $response2->assertUnprocessable();
+        $response2->assertJsonValidationErrors(['from']);
+        $response2->assertJsonMissingValidationErrors(['to']);
     }
 
     #[Test]
