@@ -1,4 +1,7 @@
 # Statamic Detour
+<a href="https://justbetter.nl" title="JustBetter">
+    <img src="./art/header.png" alt="JustBetter logo">
+</a>
 
 This Statamic addon provides a flexible redirect management system for your Statamic projects.
 
