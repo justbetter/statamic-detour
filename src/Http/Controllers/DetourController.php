@@ -16,10 +16,7 @@ class DetourController
 {
     public function index(IndexRequest $request, ListsDetours $contract): mixed
     {
-        /** @var int $size */
-        $size = $request->validated()['size'] ?? 15;
-
-        $data = $contract->list($size, Paginator::resolveCurrentPage());
+        $data = $contract->list($request->size ?? 15, Paginator::resolveCurrentPage());
 
         /** @var view-string $view */
         $view = 'statamic-detour::detours.index';
