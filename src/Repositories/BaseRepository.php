@@ -3,17 +3,18 @@
 namespace JustBetter\Detour\Repositories;
 
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Enumerable;
 use JustBetter\Detour\Data\Detour;
-use JustBetter\Detour\Data\DetourFilter;
 use JustBetter\Detour\Data\Form;
+use JustBetter\Detour\Data\Paginate;
 
 abstract class BaseRepository
 {
-    /** @return array<string, Detour> */
-    abstract public function get(?DetourFilter $filter = null): array;
+    /** @return Enumerable<int, Detour> */
+    abstract public function get(): Enumerable;
 
-    /** @return LengthAwarePaginator<string, Detour> */
-    abstract public function paginate(int $perPage, ?int $page = null): LengthAwarePaginator;
+    /** @return LengthAwarePaginator<int, Detour> */
+    abstract public function paginate(Paginate $paginate): LengthAwarePaginator;
 
     abstract public function find(string $id): ?Detour;
 

@@ -2,52 +2,32 @@
 
 namespace JustBetter\Detour\Repositories;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Enumerable;
 use JustBetter\Detour\Data\Detour;
-use JustBetter\Detour\Data\DetourFilter;
 use JustBetter\Detour\Data\Form;
+use JustBetter\Detour\Data\Paginate;
 use JustBetter\Detour\Models\Detour as DetourModel;
 
 class EloquentRepository extends BaseRepository
 {
-    public function get(?DetourFilter $filter = null): array
+    public function get(): Enumerable
     {
         return DetourModel::query()
-            ->when($filter, function (Builder $query, DetourFilter $filter) {
-                $query->where(function (Builder $query) use ($filter): void {
-                    $query->where(function (Builder $query) use ($filter): void {
-                        $query->where('type', 'path')
-                            ->where('from', $filter->path);
-                    })
-                        ->orWhere('type', 'regex');
-                });
-            })
-            ->get()
-            ->mapWithKeys(fn (DetourModel $model) => [$model->id => Detour::make($model->toArray())])
-            ->all();
+            ->lazy()
+            ->map(fn (DetourModel $model): Detour => Detour::make($model->toArray()));
     }
 
-    //TODO: Pagination verwerken in het filter van de get method
-    public function paginate(int $perPage, ?int $page = null): LengthAwarePaginator
+    public function paginate(Paginate $paginate): LengthAwarePaginator
     {
-        $paginator = DetourModel::query()->paginate($perPage, ['*'], 'page', $page);
-
-        $collection = $paginator->getCollection()
-            ->mapWithKeys(fn (DetourModel $detour) => [$detour->id => Detour::make($detour->toArray())]);
-
-        return new LengthAwarePaginator(
-            $collection,
-            $paginator->total(),
-            $paginator->perPage(),
-            $paginator->currentPage(),
-            ['path' => $paginator->path(), 'pageName' => $paginator->getPageName()]
-        );
+        return DetourModel::query()
+            ->paginate($paginate->size, page: $paginate->page)
+            ->through(fn (DetourModel $model): Detour => Detour::make($model->toArray()));
     }
 
     public function find(string $id): Detour
     {
-        $model = DetourModel::findOrFail($id);
+        $model = DetourModel::query()->findOrFail($id);
 
         return Detour::make($model->toArray());
     }
@@ -63,8 +43,7 @@ class EloquentRepository extends BaseRepository
 
     public function delete(string $id): void
     {
-        $model = DetourModel::findOrFail($id);
-
+        $model = DetourModel::query()->findOrFail($id);
         $model->delete();
     }
 }

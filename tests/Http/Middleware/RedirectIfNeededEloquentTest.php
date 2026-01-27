@@ -61,12 +61,28 @@ class RedirectIfNeededEloquentTest extends TestCase
     }
 
     #[Test]
-    public function it_does_not_redirect_when_detour_exists_but_not_for_requested_route(): void
+    public function it_does_not_redirect_when_path_type_detour_exists_but_not_for_requested_route(): void
     {
         Detour::create([
             'from' => '/::from::',
             'to' => '/::to::',
             'type' => 'path',
+            'code' => '301',
+            'sites' => [],
+        ]);
+
+        $this->get('/::other::')
+            ->assertSee('::other::')
+            ->assertStatus(200);
+    }
+
+    #[Test]
+    public function it_does_not_redirect_when_regex_type_detour_exists_but_not_for_requested_route(): void
+    {
+        Detour::create([
+            'from' => '#/::regex::#',
+            'to' => '/::to::',
+            'type' => 'regex',
             'code' => '301',
             'sites' => [],
         ]);
@@ -89,6 +105,22 @@ class RedirectIfNeededEloquentTest extends TestCase
 
         $this->get('/from/123')
             ->assertRedirect('/::to::')
+            ->assertStatus(301);
+    }
+
+    #[Test]
+    public function it_redirects_when_the_from_pattern_is_a_complex_matching_regex(): void
+    {
+        Detour::create([
+            'from' => '#^/blog/(\d{4})/(\d{2})/(.*)$#',
+            'to' => '/articles/$1/$2/$3',
+            'type' => 'regex',
+            'code' => '301',
+            'sites' => [],
+        ]);
+
+        $this->get('/blog/2024/01/hello-world')
+            ->assertRedirect('/articles/2024/01/hello-world')
             ->assertStatus(301);
     }
 }

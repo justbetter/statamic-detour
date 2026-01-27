@@ -4,6 +4,7 @@ namespace JustBetter\Detour\Actions;
 
 use JustBetter\Detour\Contracts\ListsDetours;
 use JustBetter\Detour\Contracts\ResolvesRepository;
+use JustBetter\Detour\Data\Paginate;
 use Statamic\Fields\Blueprint;
 
 class ListDetours implements ListsDetours
@@ -12,23 +13,21 @@ class ListDetours implements ListsDetours
         protected ResolvesRepository $resolvesRepository
     ) {}
 
-    public function list(): array
+    public function list(int $size, int $page): array
     {
         $repository = $this->resolvesRepository->resolve();
 
         // @phpstan-ignore-next-line
         $oldDirectory = Blueprint::directory();
 
-        /** @var int $perPage */
-        $perPage = config('justbetter.statamic-detour.per_page', 10);
+        $paginate = Paginate::make(['size' => $size,  'page' => $page])->validate();
 
-        $paginated = $repository->paginate($perPage);
-        $values = $paginated->items();
+        $paginator = $repository->paginate($paginate);
 
         // @phpstan-ignore-next-line
         $blueprint = Blueprint::setDirectories(__DIR__.'/../../resources/blueprints')->find('detour');
         $fields = $blueprint->fields();
-        $fields = $fields->addValues($values);
+        $fields = $fields->addValues($paginator->items());
         $fields = $fields->preProcess();
 
         if ($oldDirectory) {
@@ -40,8 +39,9 @@ class ListDetours implements ListsDetours
             'blueprint' => $blueprint->toPublishArray(),
             'values' => $fields->values(),
             'meta' => $fields->meta(),
-            'data' => $paginated,
+            'data' => $paginator->items(),
             'action' => cp_route('justbetter.detours.store'),
+            'paginator' => $paginator,
         ];
     }
 

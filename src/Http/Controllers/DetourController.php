@@ -3,18 +3,24 @@
 namespace JustBetter\Detour\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Pagination\Paginator;
 use Illuminate\View\View;
 use JustBetter\Detour\Contracts\DeletesDetour;
 use JustBetter\Detour\Contracts\ListsDetours;
 use JustBetter\Detour\Contracts\StoresDetour;
 use JustBetter\Detour\Data\Form;
+use JustBetter\Detour\Http\Requests\IndexRequest;
 use JustBetter\Detour\Http\Requests\StoreRequest;
 
 class DetourController
 {
-    public function index(ListsDetours $contract): mixed
+    public function index(IndexRequest $request, ListsDetours $contract): mixed
     {
-        $data = $contract->list();
+        /** @var int $size */
+        $size = $request->validated()['size'] ?? 15;
+
+        $data = $contract->list($size, Paginator::resolveCurrentPage());
+
         /** @var view-string $view */
         $view = 'statamic-detour::detours.index';
 

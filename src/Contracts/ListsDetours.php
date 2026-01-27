@@ -2,7 +2,6 @@
 
 namespace JustBetter\Detour\Contracts;
 
-use Illuminate\Pagination\LengthAwarePaginator;
 use JustBetter\Detour\Data\Detour;
 
 interface ListsDetours
@@ -12,9 +11,9 @@ interface ListsDetours
      *     blueprint: array<string, mixed>,
      *     values: array<string, mixed>,
      *     meta: array<string, mixed>,
-     *     data: LengthAwarePaginator<string, Detour>,
+     *     data: Detour[],
      *     action: string
      * }
      */
-    public function list(): array;
+    public function list(int $size, int $page): array;
 }

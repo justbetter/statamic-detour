@@ -15,6 +15,4 @@ return [
     'path' => base_path('content/detours'),
 
     'mode' => env('STATAMIC_DETOUR_MODE', 'basic'), // basic | performance
-
-    'per_page' => 10,
 ];

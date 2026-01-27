@@ -7,6 +7,7 @@ use JustBetter\Detour\Actions\ResolveRepository;
 use JustBetter\Detour\Contracts\ListsDetours;
 use JustBetter\Detour\Data\Form;
 use JustBetter\Detour\Http\Controllers\DetourController;
+use JustBetter\Detour\Http\Requests\IndexRequest;
 use JustBetter\Detour\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -17,8 +18,11 @@ class DetourControllerTest extends TestCase
     {
         $controller = app(DetourController::class);
         $contract = app(ListsDetours::class);
+        $request = IndexRequest::create('/cp/detours', 'GET');
+        $request->setContainer(app())->setRedirector(app('redirect'));
+        $request->validateResolved();
 
-        $this->assertInstanceOf(View::class, $controller->index($contract));
+        $this->assertInstanceOf(View::class, $controller->index($request, $contract));
     }
 
     #[Test]

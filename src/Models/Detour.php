@@ -4,12 +4,13 @@ namespace JustBetter\Detour\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use JustBetter\Detour\Enums\Type;
 
 /**
  * @property string $id
  * @property string $from
  * @property string $to
- * @property string $type
+ * @property Type $type
  * @property int $code
  * @property array<int, string> $sites
  */
@@ -24,6 +25,7 @@ class Detour extends Model
     public function casts(): array
     {
         return [
+            'type' => Type::class,
             'sites' => 'array',
         ];
     }
