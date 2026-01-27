@@ -10,7 +10,7 @@
             :items='@json($data)'
         ></Detours>
         <div class="mt-4">
-            {{ $paginator->links('pagination::simple-tailwind') }}
+            {{ $paginator->withQueryString()->links('pagination::simple-tailwind') }}
         </div>
     </div>
 @endsection

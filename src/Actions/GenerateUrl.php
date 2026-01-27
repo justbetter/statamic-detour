@@ -8,18 +8,14 @@ use JustBetter\Detour\Enums\Type;
 
 class GenerateUrl implements GeneratesUrl
 {
-    public function generate(Detour $detour, string $path): string
+    public function generate(Detour $detour, string $path): ?string
     {
         if ($detour->isType(Type::Regex)) {
-            preg_match($detour->from, $path, $matches);
-
-            $url = $detour->to;
-
-            foreach ($matches as $index => $match) {
-                $url = str_replace('$'.$index, $match, $url);
+            if (! str_contains($detour->to, '$')) {
+                return $detour->to;
             }
 
-            return $url;
+            return preg_replace($detour->from, $detour->to, $path);
         }
 
         return $detour->to;

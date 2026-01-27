@@ -24,7 +24,7 @@ class RedirectIfNeeded
         if ($detour) {
             $url = $this->generator->generate($detour, $path);
 
-            return redirect()->to($url, $detour->code);
+            return $url ? redirect()->to($url, $detour->code) : $next($request);
         }
 
         return $next($request);
