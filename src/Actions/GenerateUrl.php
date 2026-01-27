@@ -10,7 +10,6 @@ class GenerateUrl implements GeneratesUrl
 {
     public function generate(Detour $detour, string $path): string
     {
-
         if ($detour->isType(Type::Regex)) {
             preg_match($detour->from, $path, $matches);
 
