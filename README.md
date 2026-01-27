@@ -6,7 +6,7 @@ This Statamic addon provides a flexible redirect management system for your Stat
 
 * PHP ^8.3
 * Laravel ^12.0
-* Statamic ^5.0
+* Statamic ^5.67.0
 
 ## Features
 
