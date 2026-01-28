@@ -3,12 +3,14 @@
 namespace JustBetter\Detour\Repositories;
 
 use Illuminate\Foundation\Application;
-use Illuminate\Support\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Enumerable;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use JustBetter\Detour\Data\Detour;
-use JustBetter\Detour\Data\DetourFilter;
 use JustBetter\Detour\Data\Form;
+use JustBetter\Detour\Data\Paginate;
 use Statamic\Facades\YAML;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -20,23 +22,37 @@ class FileRepository extends BaseRepository
         File::ensureDirectoryExists($this->path);
     }
 
-    public function get(?DetourFilter $filter = null): array
+    public function get(): Enumerable
     {
         return collect(File::allFiles($this->path))
             ->filter(fn (SplFileInfo $file) => str($file->getFilename())->endsWith('.yaml'))
             ->map(fn (SplFileInfo $file) => $this->detourByFile($file))
-            ->when($filter, function (Collection $detours, DetourFilter $filter) {
-                $detours->filter(function (?Detour $detour) use ($filter): bool {
-                    if (! $detour) {
-                        return false;
-                    }
+            ->filter();
+    }
 
-                    return $detour->type === 'regex' || $detour->from === $filter->path;
-                });
-            })
-            ->filter()
-            ->mapWithKeys(fn (Detour $detour) => [$detour->id => $detour])
-            ->all();
+    public function paginate(Paginate $paginate): LengthAwarePaginator
+    {
+        $paginate->validate();
+
+        $collection = $this->get()->values();
+
+        $total = $collection->count();
+        $perPage = $paginate->size;
+
+        $items = $collection
+            ->slice(($paginate->page - 1) * $perPage, $perPage)
+            ->values();
+
+        return new LengthAwarePaginator(
+            $items,
+            $total,
+            $perPage,
+            $paginate->page,
+            [
+                'path' => Paginator::resolveCurrentPath(),
+                'pageName' => 'page',
+            ]
+        );
     }
 
     public function find(string $id): ?Detour
@@ -47,9 +63,8 @@ class FileRepository extends BaseRepository
         }
 
         $data = YAML::parse(File::get($file));
-        $detour = Detour::make(['id' => $id, ...$data]);
 
-        return $detour;
+        return Detour::make(['id' => $id, ...$data]);
     }
 
     public function store(Form $form): Detour

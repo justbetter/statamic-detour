@@ -13,7 +13,7 @@ class TestCase extends AddonTestCase
 
     protected string $addonServiceProvider = ServiceProvider::class;
 
-    protected function resolveApplicationConfiguration($app)
+    protected function resolveApplicationConfiguration($app): void
     {
         parent::resolveApplicationConfiguration($app);
 
@@ -29,5 +29,11 @@ class TestCase extends AddonTestCase
             'database' => ':memory:',
             'prefix' => '',
         ]);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
     }
 }

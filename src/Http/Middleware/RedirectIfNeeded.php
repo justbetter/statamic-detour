@@ -4,23 +4,27 @@ namespace JustBetter\Detour\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use JustBetter\Detour\Contracts\HandlesDetour;
+use JustBetter\Detour\Contracts\GeneratesUrl;
+use JustBetter\Detour\Contracts\MatchesDetour;
 use Symfony\Component\HttpFoundation\Response;
 
 class RedirectIfNeeded
 {
     public function __construct(
-        private HandlesDetour $handler
+        protected MatchesDetour $matcher,
+        protected GeneratesUrl $generator
     ) {}
 
     public function handle(Request $request, Closure $next): Response
     {
-        $normalizedPath = '/'.ltrim($request->path(), '/');
+        $path = '/'.ltrim($request->path(), '/');
 
-        $applicableDetour = $this->handler->handle($normalizedPath);
+        $detour = $this->matcher->match($path);
 
-        if ($applicableDetour) {
-            return redirect()->to($applicableDetour->to, $applicableDetour->code);
+        if ($detour) {
+            $url = $this->generator->generate($detour, $path);
+
+            return $url ? redirect()->to($url, $detour->code) : $next($request);
         }
 
         return $next($request);

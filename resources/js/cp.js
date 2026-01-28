@@ -1,5 +1,5 @@
 import Detours from './components/Detours.vue';
 
 Statamic.booting(() => {
-    Statamic.$components.register('detours', Detours);
+    Statamic.$components.register('Detours', Detours);
 });

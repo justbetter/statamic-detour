@@ -4,7 +4,7 @@ namespace JustBetter\Detour\Contracts;
 
 use JustBetter\Detour\Data\Detour;
 
-interface HandlesDetour
+interface MatchesDetour
 {
-    public function handle(string $path): ?Detour;
+    public function match(string $path): ?Detour;
 }

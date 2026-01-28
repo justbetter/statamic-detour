@@ -1,9 +1,7 @@
 <template>
     <div>
-        <publish-form :title="''" :action="action" :blueprint="blueprint" :meta="meta" :values="values"
-            @saved="addItem($event)"></publish-form>
-
-            <table class="min-w-full border border-gray-200">
+        <publish-form :title="''" :action="action" :blueprint="blueprint" :meta="meta" :values="values" @saved="addItem($event)"></publish-form>
+        <table class="min-w-full border border-gray-200">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">{{ __('From') }}</th>
@@ -15,7 +13,7 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-                <tr class="hover:bg-gray-50 text-gray-900" v-for="item, id in detours" :key="id">
+                <tr class="hover:bg-gray-50 text-gray-900" v-for="(item, id) in detours" :key="id">
                     <td class="px-4 py-3 text-sm">{{ item.from }}</td>
                     <td class="px-4 py-3 text-sm">{{ item.to }}</td>
                     <td class="px-4 py-3 text-sm">{{ item.type }}</td>
@@ -62,7 +60,7 @@ export default ({
     methods: {
         deleteItem(id, type = 'delete') {
             if (type == 'delete') {
-                delete this.detours[id];    
+                delete this.detours[id];
             }
 
             this.$forceUpdate();
@@ -76,7 +74,7 @@ export default ({
         deleteDetour(id) {
             const url = cp_url('/detours/' + id);
             Statamic.$axios.delete(url).then(() => this.deleteItem(id));
-        }
+        },
     }
 })
 </script>

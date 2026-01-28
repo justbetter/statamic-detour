@@ -5,7 +5,7 @@ use JustBetter\Detour\Repositories\FileRepository;
 
 return [
 
-    'driver' => 'file',
+    'driver' => env('STATAMIC_DETOUR_DRIVER', 'file'),
 
     'drivers' => [
         'file' => FileRepository::class,

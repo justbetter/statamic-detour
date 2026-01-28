@@ -1,9 +1,12 @@
 <?php
 
-namespace JustBetter\Detour\Tests\Repositories\Eloquent;
+namespace JustBetter\Detour\Tests\Repositories;
 
 use JustBetter\Detour\Actions\ResolveRepository;
+use JustBetter\Detour\Data\Detour;
 use JustBetter\Detour\Data\Form;
+use JustBetter\Detour\Data\Paginate;
+use JustBetter\Detour\Enums\Type;
 use JustBetter\Detour\Models\Detour as DetourModel;
 use JustBetter\Detour\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
@@ -24,14 +27,14 @@ class EloquentDetourRepositoryTest extends TestCase
             'from' => '::from::',
             'to' => '::to::',
             'code' => '302',
-            'type' => '::path::',
+            'type' => Type::Path,
         ]);
 
         DetourModel::create([
             'from' => '::from::',
             'to' => '::to::',
             'code' => '302',
-            'type' => '::path::',
+            'type' => Type::Path,
         ]);
 
         $contract = app(ResolveRepository::class);
@@ -40,6 +43,25 @@ class EloquentDetourRepositoryTest extends TestCase
         $all = $repository->get();
 
         $this->assertCount(2, $all);
+    }
+
+    #[Test]
+    public function it_can_be_queried_by_find_function(): void
+    {
+        $contract = app(ResolveRepository::class);
+        $repository = $contract->resolve();
+
+        $createdDetour = DetourModel::create([
+            'from' => '::from::',
+            'to' => '::to::',
+            'code' => '302',
+            'type' => Type::Path,
+        ]);
+
+        /** @var Detour $foundDetour */
+        $foundDetour = $repository->find($createdDetour->id);
+
+        $this->assertSame($createdDetour->id, $foundDetour->id);
     }
 
     #[Test]
@@ -52,7 +74,7 @@ class EloquentDetourRepositoryTest extends TestCase
             'from' => '::from::',
             'to' => '::to::',
             'code' => '302',
-            'type' => '::path::',
+            'type' => Type::Path,
         ]);
 
         $detour = $repository->store($data);
@@ -65,7 +87,53 @@ class EloquentDetourRepositoryTest extends TestCase
             'from' => '::from::',
             'to' => '::to::',
             'code' => '302',
-            'type' => '::path::',
+            'type' => Type::Path,
         ]);
+    }
+
+    #[Test]
+    public function it_can_paginate(): void
+    {
+        DetourModel::create([
+            'from' => '::from-1::',
+            'to' => '::to-1::',
+            'code' => '302',
+            'type' => Type::Path,
+        ]);
+
+        DetourModel::create([
+            'from' => '::from-2::',
+            'to' => '::to-2::',
+            'code' => '302',
+            'type' => Type::Path,
+        ]);
+
+        DetourModel::create([
+            'from' => '::from-3::',
+            'to' => '::to-3::',
+            'code' => '302',
+            'type' => Type::Path,
+        ]);
+
+        $contract = app(ResolveRepository::class);
+        $repository = $contract->resolve();
+
+        $paginate = Paginate::make([
+            'size' => 2,
+            'page' => 1,
+        ]);
+
+        $results = $repository->paginate($paginate);
+
+        $this->assertSame(2, $results->count());
+
+        $paginate = Paginate::make([
+            'size' => 2,
+            'page' => 2,
+        ]);
+
+        $results2 = $repository->paginate($paginate);
+
+        $this->assertSame(1, $results2->count());
     }
 }
