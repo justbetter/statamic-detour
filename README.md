@@ -50,6 +50,12 @@ return [
 ];
 ```
 
+Or set via environment variable:
+
+```env
+STATAMIC_DETOUR_DRIVER=file
+```
+
 #### Eloquent Driver
 
 Store redirects in the database. This is recommended for larger sites with many redirects for better performance.
@@ -58,6 +64,12 @@ Store redirects in the database. This is recommended for larger sites with many 
 return [
     'driver' => 'eloquent',
 ];
+```
+
+Or set via environment variable:
+
+```env
+STATAMIC_DETOUR_DRIVER=eloquent
 ```
 
 When using the Eloquent driver, run the migrations:

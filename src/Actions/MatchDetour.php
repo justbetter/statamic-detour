@@ -17,7 +17,7 @@ class MatchDetour implements MatchesDetour
         $repository = $this->resolver->resolve();
 
         /** @var Site $site */
-        $site = SiteFacade::selected();
+        $site = SiteFacade::current();
 
         $detours = $repository->get();
 
