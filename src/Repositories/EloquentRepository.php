@@ -41,6 +41,19 @@ class EloquentRepository extends BaseRepository
         return Detour::make($model->toArray());
     }
 
+    public function update(string $id, Form $form): Detour
+    {
+        $detourModel = DetourModel::query()->find($id);
+
+        if (! $detourModel) {
+            return $this->store($form);
+        }
+
+        $detourModel->update($form->toArray());
+
+        return Detour::make($detourModel->toArray());
+    }
+
     public function delete(string $id): void
     {
         $model = DetourModel::query()->findOrFail($id);

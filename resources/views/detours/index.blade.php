@@ -1,5 +1,7 @@
 @extends('statamic::layout')
 
+@section('title', 'Detours - Overview')
+
 @section('content')
     <div>
         <Detours

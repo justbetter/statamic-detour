@@ -20,5 +20,7 @@ abstract class BaseRepository
 
     abstract public function store(Form $form): Detour;
 
+    abstract public function update(string $id, Form $form): Detour;
+
     abstract public function delete(string $id): void;
 }

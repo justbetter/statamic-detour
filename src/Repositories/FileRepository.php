@@ -71,13 +71,18 @@ class FileRepository extends BaseRepository
     {
         $data = $form->toArray();
 
-        $id = Str::uuid()->toString();
+        $id = $form->id ? $form->id : Str::uuid()->toString();
         $file = $this->filePath($id);
 
         File::ensureDirectoryExists($this->path);
         File::put($file, YAML::dump($data));
 
         return Detour::make(['id' => $id, ...$data]);
+    }
+
+    public function update(string $id, Form $form): Detour
+    {
+        return $this->store($form);
     }
 
     public function delete(string $id): void
