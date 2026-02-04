@@ -13,27 +13,6 @@ use PHPUnit\Framework\Attributes\Test;
 
 class FileDetourRepositoryTest extends TestCase
 {
-    protected function defineEnvironment($app): void
-    {
-        parent::defineEnvironment($app);
-
-        $app['config']->set('justbetter.statamic-detour.driver', 'file');
-        $app['config']->set('justbetter.statamic-detour.path', __DIR__.'/../__fixtures__/detours');
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        foreach (scandir(__DIR__.'/../__fixtures__/detours') as $file) {
-            if ($file === '.' || $file === '..' || $file === '.gitkeep') {
-                continue;
-            }
-
-            unlink(__DIR__.'/../__fixtures__/detours/'.$file);
-        }
-    }
-
     #[Test]
     public function it_can_be_queried(): void
     {

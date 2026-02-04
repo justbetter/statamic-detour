@@ -13,7 +13,7 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-                <tr class="hover:bg-gray-50 text-gray-900" v-for="(item, id) in detours" :key="id">
+                <tr class="hover:bg-gray-50 text-gray-900" v-for="(item, key) in detours" :key="item.id">
                     <td class="px-4 py-3 text-sm">{{ item.from }}</td>
                     <td class="px-4 py-3 text-sm">{{ item.to }}</td>
                     <td class="px-4 py-3 text-sm">{{ item.type }}</td>
@@ -25,7 +25,7 @@
                     </td>
                     <td class="px-4 py-3 text-right">
                         <button
-                            @click="deleteDetour(id)"
+                            @click="deleteDetour(item.id)"
                             class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-red-500 rounded hover:bg-red-400 focus:outline-none focus:ring-2 focus:ring-red-500">
                             {{ __('Delete') }}
                         </button>
@@ -58,16 +58,15 @@ export default ({
     },
 
     methods: {
-        deleteItem(id, type = 'delete') {
-            if (type == 'delete') {
-                delete this.detours[id];
-            }
+        deleteItem(id) {
+            const index = this.detours.findIndex(item => item.id === id);
+            this.detours.splice(index, 1);
 
             this.$forceUpdate();
         },
 
         addItem(event) {
-            this.detours[event.data.id] = event.data;
+            this.detours.push(event.data);
             this.$forceUpdate();
         },
 

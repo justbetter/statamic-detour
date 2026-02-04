@@ -136,4 +136,58 @@ class EloquentDetourRepositoryTest extends TestCase
 
         $this->assertSame(1, $results2->count());
     }
+
+    #[Test]
+    public function it_can_be_updated(): void
+    {
+        $contract = app(ResolveRepository::class);
+        $repository = $contract->resolve();
+
+        $model = DetourModel::create([
+            'from' => '::from::',
+            'to' => '::to::',
+            'code' => '302',
+            'type' => Type::Path,
+        ]);
+
+        $data = Form::make([
+            'from' => '::from-new::',
+            'to' => '::to-new::',
+            'code' => '302',
+            'type' => Type::Path,
+        ]);
+
+        $repository->update($model->id, $data);
+
+        $this->assertDatabaseHas('detours', [
+            'id' => $model->id,
+            'from' => '::from-new::',
+            'to' => '::to-new::',
+            'code' => '302',
+            'type' => Type::Path,
+        ]);
+    }
+
+    #[Test]
+    public function it_will_create_model_if_not_updateable(): void
+    {
+        $contract = app(ResolveRepository::class);
+        $repository = $contract->resolve();
+
+        $data = Form::make([
+            'from' => '::from-new::',
+            'to' => '::to-new::',
+            'code' => '302',
+            'type' => Type::Path,
+        ]);
+
+        $repository->update('nonsense', $data);
+
+        $this->assertDatabaseHas('detours', [
+            'from' => '::from-new::',
+            'to' => '::to-new::',
+            'code' => '302',
+            'type' => Type::Path,
+        ]);
+    }
 }
