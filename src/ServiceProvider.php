@@ -13,7 +13,13 @@ use JustBetter\Detour\Actions\MatchDetour;
 use JustBetter\Detour\Actions\ResolveRepository;
 use JustBetter\Detour\Actions\StoreDetour;
 use JustBetter\Detour\Http\Middleware\RedirectIfNeeded;
+use JustBetter\Detour\Listeners\CacheOldUri;
+use JustBetter\Detour\Listeners\CreateRedirect;
 use JustBetter\Detour\Repositories\FileRepository;
+use Statamic\Events\CollectionTreeSaved;
+use Statamic\Events\CollectionTreeSaving;
+use Statamic\Events\EntrySaved;
+use Statamic\Events\EntrySaving;
 use Statamic\Facades\CP\Nav;
 use Statamic\Providers\AddonServiceProvider;
 
@@ -30,6 +36,21 @@ class ServiceProvider extends AddonServiceProvider
             'resources/js/cp.js',
         ],
         'publicDirectory' => 'resources/dist',
+    ];
+
+    protected $listen = [
+        EntrySaving::class => [
+            CacheOldUri::class,
+        ],
+        CollectionTreeSaving::class => [
+            CacheOldUri::class,
+        ],
+        EntrySaved::class => [
+            CreateRedirect::class,
+        ],
+        CollectionTreeSaved::class => [
+            CreateRedirect::class,
+        ],
     ];
 
     public function register(): void
