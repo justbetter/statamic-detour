@@ -2,56 +2,76 @@
 
 namespace JustBetter\Detour\Listeners;
 
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str;
+use JustBetter\Detour\Contracts\CachesOldEntryUri;
+use JustBetter\Detour\Utils\EntryHelper;
+use Statamic\Entries\Entry;
 use Statamic\Events\CollectionTreeSaving;
 use Statamic\Events\EntrySaving;
-use Statamic\Facades\Entry;
+use Statamic\Facades\Entry as EntryFacade;
+use Statamic\Structures\CollectionTreeDiff;
 
 class CacheOldUri
 {
+    public function __construct(protected CachesOldEntryUri $contract) {}
+
     public function handle(EntrySaving|CollectionTreeSaving $event): void
     {
-        if (! config()->boolean('justbetter.statamic-detour.auto_create')) {
+        if (!config()->boolean('justbetter.statamic-detour.auto_create')) {
             return;
         }
 
         if ($event instanceof EntrySaving) {
-            if (! $event->entry->id()) {
+            if (!$event->entry->id()) {
                 return;
             }
 
-            $this->cacheEntryUri($event->entry->id());
+            $parentOldSlug = $event->entry->getOriginal('slug');
+            $parentNewSlug = $event->entry->slug();
+
+            foreach (EntryHelper::entryAndDescendantIds($event->entry) as $entryId) {
+                /** @var Entry|null $entry */
+                $entry = EntryFacade::find($entryId);
+                if (!$entry) {
+                    continue;
+                }
+
+                if ($entry->id() === $event->entry->id()) {
+                    $this->contract->cache($entry);
+                } else {
+                    $this->contract->cache($entry, $parentOldSlug, $parentNewSlug);
+                }
+            }
 
             return;
         }
 
-        /** @var \Statamic\Structures\CollectionTreeDiff $diff */
+        /** @var CollectionTreeDiff $diff */
         $diff = $event->tree->diff();
 
-        foreach ($diff->affected() as $entry) {
-            $this->cacheEntryUri($entry);
+        foreach ($diff->affected() as $entryId) {
+            /** @var Entry|null $entry */
+            $entry = EntryFacade::find($entryId);
+            if (!$entry) {
+                continue;
+            }
+
+            $parentOldSlug = $entry->getOriginal('slug');
+            $parentNewSlug = $entry->slug();
+
+            foreach (EntryHelper::entryAndDescendantIds($entry) as $affectedId) {
+                /** @var Entry|null $affectedEntry */
+                $affectedEntry = EntryFacade::find($affectedId);
+                if (!$affectedEntry) {
+                    continue;
+                }
+
+                if ($affectedEntry->id() === $entry->id()) {
+                    $this->contract->cache($affectedEntry);
+                } else {
+                    $this->contract->cache($affectedEntry, $parentOldSlug, $parentNewSlug);
+                }
+
+            }
         }
-    }
-
-    protected function cacheEntryUri(string $entryId): void
-    {
-        $entry = Entry::find($entryId);
-
-        if (! $entry || ! $uri = $entry->uri()) {
-            return;
-        }
-
-        if (! $entry->published()) {
-            return;
-        }
-
-        $originalSlug = $entry->getOriginal('slug');
-        $uriWithoutSlug = Str::beforeLast($uri, '/');
-        $slug = is_string($originalSlug) && $originalSlug !== '' ? $originalSlug : $entry->slug();
-
-        $oldUri = "{$uriWithoutSlug}/{$slug}";
-
-        Cache::put("redirect-entry-uri-before:{$entry->id()}", $oldUri, now()->addMinute());
     }
 }

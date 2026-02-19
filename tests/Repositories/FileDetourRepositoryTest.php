@@ -13,6 +13,13 @@ use PHPUnit\Framework\Attributes\Test;
 
 class FileDetourRepositoryTest extends TestCase
 {
+    protected function defineEnvironment($app): void
+    {
+        parent::defineEnvironment($app);
+
+        $app['config']->set('justbetter.statamic-detour.driver', 'file');
+    }
+
     #[Test]
     public function it_can_be_queried(): void
     {

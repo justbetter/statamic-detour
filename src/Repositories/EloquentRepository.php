@@ -32,6 +32,13 @@ class EloquentRepository extends BaseRepository
         return Detour::make($model->toArray());
     }
 
+    public function findBy(string $field, mixed $value): ?Detour
+    {
+        $model = DetourModel::query()->firstWhere($field, $value);
+
+        return $model ? Detour::make($model->toArray()) : null;
+    }
+
     public function store(Form $form): Detour
     {
         $data = $form->toArray();

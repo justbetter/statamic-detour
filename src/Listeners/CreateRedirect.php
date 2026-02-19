@@ -4,24 +4,24 @@ namespace JustBetter\Detour\Listeners;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use JustBetter\Detour\Contracts\DeletesDetour;
+use JustBetter\Detour\Contracts\FindsDetour;
 use JustBetter\Detour\Contracts\StoresDetour;
 use JustBetter\Detour\Data\Form;
 use JustBetter\Detour\Enums\Type;
-use JustBetter\Detour\Models\Detour;
+use JustBetter\Detour\Utils\EntryHelper;
 use Statamic\Entries\Entry;
 use Statamic\Events\CollectionTreeSaved;
 use Statamic\Events\EntrySaved;
-use Statamic\Facades\Blink;
 use Statamic\Facades\Entry as EntryFacade;
 
 class CreateRedirect
 {
-    protected StoresDetour $contract;
-
-    public function __construct(StoresDetour $contract)
-    {
-        $this->contract = $contract;
-    }
+    public function __construct(
+        protected StoresDetour  $storeContract,
+        protected FindsDetour   $findContract,
+        protected DeletesDetour $deleteContract
+    ){}
 
     public function handle(EntrySaved|CollectionTreeSaved $event): void
     {
@@ -29,47 +29,23 @@ class CreateRedirect
             return;
         }
 
-        match (true) {
-            $event instanceof EntrySaved => $this->createRedirect($event->entry),
-            $event instanceof CollectionTreeSaved => $this->createRedirect($this->treeToEntries($event->tree->tree())),
-        };
+        if ($event instanceof EntrySaved) {
+            foreach (EntryHelper::entryAndDescendantIds($event->entry) as $entryId) {
+                /** @var Entry|null $entry */
+                $entry = EntryFacade::find($entryId);
+                if (!$entry) {
+                    continue;
+                }
+
+                $this->createRedirect($entry);
+            }
+
+        } else {
+            $this->createRedirect(EntryHelper::treeToEntries($event->tree->tree()));
+        }
     }
 
-    protected function treeToEntries(array $tree): array
-    {
-        $ids = [];
-
-        foreach ($tree as $item) {
-            $ids = array_merge($ids, $this->gatherEntryIds($item));
-        }
-
-        foreach ($ids as $id) {
-            Blink::forget('eloquent-entry-' . $id);
-        }
-
-        return EntryFacade::query()->whereIn('id', $ids)->get()->all();
-    }
-
-    protected function gatherEntryIds(array $item): array
-    {
-        $ids = [];
-
-        if (isset($item['entry'])) {
-            $ids[] = $item['entry'];
-        }
-
-        if (!isset($item['children'])) {
-            return $ids;
-        }
-
-        foreach ($item['children'] as $child) {
-            $ids = array_merge($ids, $this->gatherEntryIds($child));
-        }
-
-        return $ids;
-    }
-
-    //TODO: How can I solve the problem when the slug of a parent is changed? Should that change all its children as well
+    /** @param Entry|array<Entry> $entries */
     protected function createRedirect(Entry|array $entries): void
     {
         $entries = Arr::wrap($entries);
@@ -83,12 +59,11 @@ class CreateRedirect
                 continue;
             }
 
-            Detour::query()
-                ->where('from', $entry->uri())
-                ->delete();
+            if ($conflictingDetour = $this->findContract->findBy('from', $entry->uri())) {
+                $this->deleteContract->delete($conflictingDetour->id);
+            }
 
-
-            if (! $oldUri = Cache::pull("redirect-entry-uri-before:{$entry->id()}")) {
+            if (!$oldUri = Cache::pull("redirect-entry-uri-before:{$entry->id()}")) {
                 continue;
             }
 
@@ -103,8 +78,7 @@ class CreateRedirect
                 'type' => Type::Path->value,
             ]);
 
-            $this->contract->store($data);
+            $this->storeContract->store($data);
         }
-
     }
 }
