@@ -5,21 +5,17 @@ namespace JustBetter\Detour\Actions;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use JustBetter\Detour\Contracts\CachesOldEntryUri;
-use JustBetter\Detour\Contracts\ResolvesRepository;
 use Statamic\Entries\Entry;
 
-class CacheOldEntryUri implements CachesOldEntryUri {
+class CacheOldEntryUri implements CachesOldEntryUri
+{
+    public function cache(Entry $entry, ?string $parentOldSlug = null, ?string $parentNewSlug = null): void
+    {
 
-    public function __construct(
-        protected ResolvesRepository $resolvesRepository
-    ) {}
-
-    public function cache(Entry $entry, ?string $parentOldSlug = null, ?string $parentNewSlug = null): void {
         if (! $uri = $entry->uri()) {
             return;
         }
-
-        if (!$entry->published()) {
+        if (! $entry->published()) {
             return;
         }
 
@@ -40,5 +36,4 @@ class CacheOldEntryUri implements CachesOldEntryUri {
     {
         app()->singleton(CachesOldEntryUri::class, static::class);
     }
-
 }

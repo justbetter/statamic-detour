@@ -15,17 +15,17 @@ use Statamic\Events\CollectionTreeSaved;
 use Statamic\Events\EntrySaved;
 use Statamic\Facades\Entry as EntryFacade;
 
-class CreateRedirect
+class CreateDetour
 {
     public function __construct(
-        protected StoresDetour  $storeContract,
-        protected FindsDetour   $findContract,
+        protected StoresDetour $storeContract,
+        protected FindsDetour $findContract,
         protected DeletesDetour $deleteContract
-    ){}
+    ) {}
 
     public function handle(EntrySaved|CollectionTreeSaved $event): void
     {
-        if (!config()->boolean('justbetter.statamic-detour.auto_create')) {
+        if (! config()->boolean('justbetter.statamic-detour.auto_create')) {
             return;
         }
 
@@ -33,25 +33,24 @@ class CreateRedirect
             foreach (EntryHelper::entryAndDescendantIds($event->entry) as $entryId) {
                 /** @var Entry|null $entry */
                 $entry = EntryFacade::find($entryId);
-                if (!$entry) {
+                if (! $entry) {
                     continue;
                 }
 
-                $this->createRedirect($entry);
+                $this->createDetour($entry);
             }
-
         } else {
-            $this->createRedirect(EntryHelper::treeToEntries($event->tree->tree()));
+            $this->createDetour(EntryHelper::treeToEntries($event->tree->tree()));
         }
     }
 
     /** @param Entry|array<Entry> $entries */
-    protected function createRedirect(Entry|array $entries): void
+    protected function createDetour(Entry|array $entries): void
     {
         $entries = Arr::wrap($entries);
 
         foreach ($entries as $entry) {
-            if (!$entry->uri()) {
+            if (! $entry->uri()) {
                 continue;
             }
 
@@ -63,7 +62,7 @@ class CreateRedirect
                 $this->deleteContract->delete($conflictingDetour->id);
             }
 
-            if (!$oldUri = Cache::pull("redirect-entry-uri-before:{$entry->id()}")) {
+            if (! $oldUri = Cache::pull("redirect-entry-uri-before:{$entry->id()}")) {
                 continue;
             }
 

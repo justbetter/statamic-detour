@@ -34,10 +34,9 @@ class EntryHelper
     }
 
     /**
-     * @param list<array<string, mixed>> $tree
+     * @param  list<array<string, mixed>>  $tree
      * @return list<Entry>
      */
-
     public static function treeToEntries(array $tree): array
     {
         $ids = [];
@@ -49,7 +48,7 @@ class EntryHelper
         $ids = array_values(array_unique($ids));
 
         foreach ($ids as $id) {
-            Blink::forget('eloquent-entry-' . $id);
+            Blink::forget('eloquent-entry-'.$id);
         }
 
         $entries = [];
@@ -66,7 +65,7 @@ class EntryHelper
     }
 
     /**
-     * @param array<string, mixed> $item
+     * @param  array<string, mixed>  $item
      * @return list<string>
      */
     public static function gatherEntryIds(array $item): array

@@ -16,7 +16,7 @@ use JustBetter\Detour\Actions\ResolveRepository;
 use JustBetter\Detour\Actions\StoreDetour;
 use JustBetter\Detour\Http\Middleware\RedirectIfNeeded;
 use JustBetter\Detour\Listeners\CacheOldUri;
-use JustBetter\Detour\Listeners\CreateRedirect;
+use JustBetter\Detour\Listeners\CreateDetour;
 use JustBetter\Detour\Repositories\FileRepository;
 use Statamic\Events\CollectionTreeSaved;
 use Statamic\Events\CollectionTreeSaving;
@@ -48,10 +48,10 @@ class ServiceProvider extends AddonServiceProvider
             CacheOldUri::class,
         ],
         EntrySaved::class => [
-            CreateRedirect::class,
+            CreateDetour::class,
         ],
         CollectionTreeSaved::class => [
-            CreateRedirect::class,
+            CreateDetour::class,
         ],
     ];
 

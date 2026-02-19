@@ -16,12 +16,16 @@ class CacheOldUri
 
     public function handle(EntrySaving|CollectionTreeSaving $event): void
     {
-        if (!config()->boolean('justbetter.statamic-detour.auto_create')) {
+        if (! config()->boolean('justbetter.statamic-detour.auto_create')) {
             return;
         }
 
         if ($event instanceof EntrySaving) {
-            if (!$event->entry->id()) {
+            if (! $event->entry->id()) {
+                return;
+            }
+
+            if (! $event->entry->isDirty('slug')) {
                 return;
             }
 
@@ -31,7 +35,7 @@ class CacheOldUri
             foreach (EntryHelper::entryAndDescendantIds($event->entry) as $entryId) {
                 /** @var Entry|null $entry */
                 $entry = EntryFacade::find($entryId);
-                if (!$entry) {
+                if (! $entry) {
                     continue;
                 }
 
@@ -51,7 +55,7 @@ class CacheOldUri
         foreach ($diff->affected() as $entryId) {
             /** @var Entry|null $entry */
             $entry = EntryFacade::find($entryId);
-            if (!$entry) {
+            if (! $entry) {
                 continue;
             }
 
@@ -61,7 +65,7 @@ class CacheOldUri
             foreach (EntryHelper::entryAndDescendantIds($entry) as $affectedId) {
                 /** @var Entry|null $affectedEntry */
                 $affectedEntry = EntryFacade::find($affectedId);
-                if (!$affectedEntry) {
+                if (! $affectedEntry) {
                     continue;
                 }
 
