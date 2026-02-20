@@ -10,6 +10,7 @@ use JustBetter\Detour\Contracts\StoresDetour;
 use JustBetter\Detour\Tests\TestCase;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Entries\Entry;
 use Statamic\Events\EntrySaved;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry as EntryFacade;
@@ -57,29 +58,5 @@ class CreatesDetoursFromEventTest extends TestCase
         $action->createFromEntrySaved(new EntrySaved($entry));
 
         $this->assertDatabaseCount('detours', 0);
-    }
-
-    #[Test]
-    public function it_auto_creates_when_enabled(): void
-    {
-        config()->set('justbetter.statamic-detour.auto_create', true);
-
-        Collection::make('pages')
-            ->routes(['default' => '/{slug}'])
-            ->save();
-
-        // @phpstan-ignore-next-line
-        EntryFacade::make()
-            ->id('::id::')
-            ->collection('pages')
-            ->slug('old')
-            ->published(true)
-            ->data(['title' => '::title::'])
-            ->save();
-
-        $entry = EntryFacade::find('::id::');
-        $entry->slug('new');
-
-
     }
 }
