@@ -11,7 +11,6 @@ use JustBetter\Detour\Data\Form;
 use JustBetter\Detour\Enums\Type;
 use JustBetter\Detour\Utils\EntryHelper;
 use Statamic\Entries\Entry;
-use Statamic\Events\CollectionTreeSaved;
 use Statamic\Events\EntrySaved;
 use Statamic\Facades\Entry as EntryFacade;
 
@@ -24,7 +23,7 @@ class CreateDetoursFromEvent implements CreatesDetoursFromEvent
         protected GetsOldEntryUri $getOldEntryUriContract,
     ) {}
 
-    public function createFromEntry(EntrySaved $event): void
+    public function createFromEntrySaved(EntrySaved $event): void
     {
         if (!config()->boolean('justbetter.statamic-detour.auto_create')) {
             return;
@@ -44,27 +43,10 @@ class CreateDetoursFromEvent implements CreatesDetoursFromEvent
         }
     }
 
-    public function createFromCollectionTree(CollectionTreeSaved $event): void
-    {
-        if (!config()->boolean('justbetter.statamic-detour.auto_create')) {
-            return;
-        }
-
-        $entries = EntryHelper::treeToEntries($event->tree->tree());
-
-        foreach ($entries as $entry) {
-            $this->createDetour($entry);
-        }
-    }
-
     protected function createDetour(Entry $entry, ?string $parentOldSlug = null, ?string $parentNewSlug = null): void
     {
         if (!$entry->uri()) {
             return;
-        }
-
-        if ($conflictingDetour = $this->findContract->findBy('from', $entry->uri())) {
-            $this->deleteContract->delete($conflictingDetour->id);
         }
 
         if ($parentOldSlug && $parentNewSlug) {
@@ -79,6 +61,10 @@ class CreateDetoursFromEvent implements CreatesDetoursFromEvent
 
         if ($entry->uri() === $oldUri) {
             return;
+        }
+
+        if ($conflictingDetour = $this->findContract->findBy('from', $entry->uri())) {
+            $this->deleteContract->delete($conflictingDetour->id);
         }
 
         $data = Form::make([

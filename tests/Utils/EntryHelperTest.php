@@ -4,9 +4,9 @@ namespace JustBetter\Detour\Tests\Utils;
 
 use JustBetter\Detour\Tests\TestCase;
 use JustBetter\Detour\Utils\EntryHelper;
-use Mockery;
 use PHPUnit\Framework\Attributes\Test;
 use Statamic\Entries\Entry;
+use Statamic\Facades\Collection;
 use Statamic\Facades\Entry as EntryFacade;
 
 class EntryHelperTest extends TestCase
@@ -14,70 +14,54 @@ class EntryHelperTest extends TestCase
     #[Test]
     public function it_returns_empty_ids_when_entry_has_no_id(): void
     {
-        $entry = Mockery::mock(Entry::class);
-        $entry->shouldReceive('id')->andReturn(null);
+        $entry = $this->mock(Entry::class);
+        $entry->shouldReceive('id')->once()->andReturnNull();
+        $entry->shouldReceive('page')->once()->andReturnNull();
 
-        $ids = EntryHelper::entryAndDescendantIds($entry);
-
-        $this->assertSame([], $ids);
+        $this->assertSame([], EntryHelper::entryAndDescendantIds($entry));
     }
 
     #[Test]
-    public function it_skips_non_entry_results_when_mapping_tree_to_entries(): void
+    public function it_returns_parent_and_child_ids_from_collection_tree(): void
     {
-        $tree = [
-            ['entry' => 'missing'],
-            ['entry' => 'valid'],
-        ];
+        $collection = Collection::make('pages')
+            ->routes(['default' => '/{slug}'])
+            ->structureContents(['root' => false]) // enable structure
+            ->save();
 
-        $validEntry = Mockery::mock(Entry::class);
+        // @phpstan-ignore-next-line
+        EntryFacade::make()
+            ->id('parent-id')
+            ->collection('pages')
+            ->slug('parent')
+            ->published(true)
+            ->data(['title' => 'Parent'])
+            ->save();
 
-        EntryFacade::shouldReceive('find')->with('missing')->andReturn(null);
-        EntryFacade::shouldReceive('find')->with('valid')->andReturn($validEntry);
+        // @phpstan-ignore-next-line
+        EntryFacade::make()
+            ->id('child-id')
+            ->collection('pages')
+            ->slug('child')
+            ->published(true)
+            ->data(['title' => 'Child'])
+            ->save();
 
-        $entries = EntryHelper::treeToEntries($tree);
-
-        $this->assertCount(1, $entries);
-        $this->assertSame([$validEntry], $entries);
-    }
-
-    #[Test]
-    public function it_skips_non_array_and_non_string_key_children_when_gathering_entry_ids(): void
-    {
-        $item = [
-            'entry' => 'parent',
-            'children' => [
-                'not-an-array-child',
-                [0 => 'invalid-numeric-key'],
-                ['entry' => 'child-valid'],
-            ],
-        ];
-
-        $ids = EntryHelper::gatherEntryIds($item);
-
-        $this->assertSame(['parent', 'child-valid'], $ids);
-    }
-
-    #[Test]
-    public function it_recursively_gathers_entry_ids_from_valid_children(): void
-    {
-        $item = [
-            'entry' => 'parent',
-            'children' => [
-                [
-                    'entry' => 'child-a',
-                    'children' => [
-                        ['entry' => 'grandchild-a1'],
-                    ],
-                ],
-                [
-                    'entry' => 'child-b',
+        $collection->structure()->in('default')->tree([
+            [
+                'entry' => 'parent-id',
+                'children' => [
+                    ['entry' => 'child-id'],
                 ],
             ],
-        ];
+        ])->save();
 
-        $ids = EntryHelper::gatherEntryIds($item);
+        /** @var \Statamic\Entries\Entry $parent */
+        $parent = EntryFacade::find('parent-id');
 
-        $this->assertSame(['parent', 'child-a', 'grandchild-a1', 'child-b'], $ids);
+        $this->assertSame(
+            ['parent-id', 'child-id'],
+            EntryHelper::entryAndDescendantIds($parent)
+        );
     }
 }
