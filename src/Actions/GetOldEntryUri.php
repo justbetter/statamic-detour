@@ -2,21 +2,19 @@
 
 namespace JustBetter\Detour\Actions;
 
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
-use JustBetter\Detour\Contracts\CachesOldEntryUri;
+use JustBetter\Detour\Contracts\GetsOldEntryUri;
 use Statamic\Entries\Entry;
 
-class CacheOldEntryUri implements CachesOldEntryUri
+class GetOldEntryUri implements GetsOldEntryUri
 {
-    public function cache(Entry $entry, ?string $parentOldSlug = null, ?string $parentNewSlug = null): void
+    public function get(Entry $entry, ?string $parentOldSlug = null, ?string $parentNewSlug = null): ?string
     {
-
         if (! $uri = $entry->uri()) {
-            return;
+            return null;
         }
         if (! $entry->published()) {
-            return;
+            return null;
         }
 
         $originalSlug = $entry->getOriginal('slug');
@@ -29,11 +27,11 @@ class CacheOldEntryUri implements CachesOldEntryUri
             $oldUri = str_replace($parentNewSlug, $parentOldSlug, $oldUri);
         }
 
-        Cache::put("redirect-entry-uri-before:{$entry->id()}", $oldUri, now()->addMinute());
+        return $oldUri;
     }
 
     public static function bind(): void
     {
-        app()->singleton(CachesOldEntryUri::class, static::class);
+        app()->singleton(GetsOldEntryUri::class, static::class);
     }
 }

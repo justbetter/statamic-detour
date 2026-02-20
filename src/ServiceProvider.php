@@ -3,11 +3,12 @@
 namespace JustBetter\Detour;
 
 use Illuminate\Routing\Router;
-use JustBetter\Detour\Actions\CacheOldEntryUri;
+use JustBetter\Detour\Actions\CreateDetoursFromEvent;
 use JustBetter\Detour\Actions\DeleteDetour;
 use JustBetter\Detour\Actions\ExportDetours;
 use JustBetter\Detour\Actions\FindDetour;
 use JustBetter\Detour\Actions\GenerateUrl;
+use JustBetter\Detour\Actions\GetOldEntryUri;
 use JustBetter\Detour\Actions\ImportDetour;
 use JustBetter\Detour\Actions\ImportDetours;
 use JustBetter\Detour\Actions\ListDetours;
@@ -15,13 +16,7 @@ use JustBetter\Detour\Actions\MatchDetour;
 use JustBetter\Detour\Actions\ResolveRepository;
 use JustBetter\Detour\Actions\StoreDetour;
 use JustBetter\Detour\Http\Middleware\RedirectIfNeeded;
-use JustBetter\Detour\Listeners\CacheOldUri;
-use JustBetter\Detour\Listeners\CreateDetour;
 use JustBetter\Detour\Repositories\FileRepository;
-use Statamic\Events\CollectionTreeSaved;
-use Statamic\Events\CollectionTreeSaving;
-use Statamic\Events\EntrySaved;
-use Statamic\Events\EntrySaving;
 use Statamic\Facades\CP\Nav;
 use Statamic\Providers\AddonServiceProvider;
 
@@ -38,21 +33,6 @@ class ServiceProvider extends AddonServiceProvider
             'resources/js/cp.js',
         ],
         'publicDirectory' => 'resources/dist',
-    ];
-
-    protected $listen = [
-        EntrySaving::class => [
-            CacheOldUri::class,
-        ],
-        CollectionTreeSaving::class => [
-            CacheOldUri::class,
-        ],
-        EntrySaved::class => [
-            CreateDetour::class,
-        ],
-        CollectionTreeSaved::class => [
-            CreateDetour::class,
-        ],
     ];
 
     public function register(): void
@@ -84,7 +64,8 @@ class ServiceProvider extends AddonServiceProvider
         ImportDetours::bind();
         ImportDetour::bind();
         FindDetour::bind();
-        CacheOldEntryUri::bind();
+        CreateDetoursFromEvent::bind();
+        GetOldEntryUri::bind();
 
         FileRepository::bind();
 
