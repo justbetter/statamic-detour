@@ -16,12 +16,9 @@ class ImportDetours implements ImportsDetours
         $file = Storage::disk($disk)->path($file);
         $rows = SimpleExcelReader::create($file)->getRows();
         $importDetour = app(ImportsDetour::class);
-
         // @phpstan-ignore-next-line argument.type
-        $rows->each(function (array $row, int $index) use ($importDetour): void {
-            try {
-                $importDetour->import($row);
-            } catch (\Throwable $e) {}
+        $rows->each(function (array $row) use ($importDetour) {
+            $importDetour->import($row);
         });
     }
 

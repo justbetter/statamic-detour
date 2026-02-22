@@ -44,10 +44,15 @@ class ImportExportControllerTest extends TestCase
 
         Queue::fake();
 
-        $file = UploadedFile::fake()->create(
-            name: 'detours.csv',
-            kilobytes: 5,
-            mimeType: 'text/csv'
+        $csv = <<<'CSV'
+            id,from,to,type,code,sites  
+            075d6161-2a33-4d21-9768-87e09a73c925,/test,/to,path,302,default
+            175d6161-2a33-4d21-9768-87e09a73c925,/test-2,/to-2,path,302,default
+            CSV;
+
+        $file = UploadedFile::fake()->createWithContent(
+            'detours.csv',
+            $csv
         );
 
         $response = $this->withoutMiddleware()->post(cp_route('justbetter.detours.actions.import'), [
@@ -57,5 +62,78 @@ class ImportExportControllerTest extends TestCase
         $response->assertRedirect(route('statamic.cp.justbetter.detours.actions.index'));
 
         Queue::assertPushed(ImportDetours::class);
+    }
+
+    #[Test]
+    public function it_does_not_import_invalid_files(): void
+    {
+        $disk = config()->string('justbetter.statamic-detour.actions.disk');
+
+        Storage::fake($disk);
+
+        Queue::fake();
+
+        $file = UploadedFile::fake()->create(
+            name: 'detours.xlsx',
+            kilobytes: 5,
+            mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+
+        $response = $this->withoutMiddleware()->post(cp_route('justbetter.detours.actions.import'), [
+            'file' => $file,
+        ]);
+
+        $response->assertSessionHasErrors();
+
+        Queue::assertNotPushed(ImportDetours::class);
+    }
+
+    #[Test]
+    public function it_does_not_import_invalid_csv_files_with_missing_headers(): void
+    {
+        $disk = config()->string('justbetter.statamic-detour.actions.disk');
+
+        Storage::fake($disk);
+        Queue::fake();
+
+        $csv = <<<'CSV'
+          from,to,type,sites,
+          /test,/to,path,default
+        CSV;
+
+        $file = UploadedFile::fake()->createWithContent('detours.csv', $csv);
+
+        $response = $this
+            ->withoutMiddleware()
+            ->from(cp_route('justbetter.detours.actions.index'))
+            ->post(cp_route('justbetter.detours.actions.import'), [
+                'file' => $file,
+            ]);
+
+        $response->assertSessionHasErrors();
+
+        Queue::assertNotPushed(ImportDetours::class);
+    }
+
+    #[Test]
+    public function it_does_not_import_csv_with_no_content(): void
+    {
+        $disk = config()->string('justbetter.statamic-detour.actions.disk');
+
+        Storage::fake($disk);
+        Queue::fake();
+
+        $file = UploadedFile::fake()->createWithContent('detours.csv', '');
+
+        $response = $this
+            ->withoutMiddleware()
+            ->from(cp_route('justbetter.detours.actions.index'))
+            ->post(cp_route('justbetter.detours.actions.import'), [
+                'file' => $file,
+            ]);
+
+        $response->assertSessionHasErrors();
+
+        Queue::assertNotPushed(ImportDetours::class);
     }
 }
