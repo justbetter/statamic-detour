@@ -16,7 +16,7 @@ class ImportDetour implements ImportsDetour
         $sites = isset($data['sites']) ? $data['sites'] : '';
         $data['sites'] = $sites ? explode(';', $sites) : '';
 
-        $data = Form::make($data);
+        $data = Form::make($data)->validate();
 
         $repository = $this->resolvesRepository->resolve();
         if ($data->id) {
