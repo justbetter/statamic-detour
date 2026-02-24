@@ -5,6 +5,7 @@ namespace JustBetter\Detour\Tests\Utils;
 use JustBetter\Detour\Tests\TestCase;
 use JustBetter\Detour\Utils\EntryHelper;
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Entries\Entry;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry as EntryFacade;
 
@@ -18,17 +19,20 @@ class EntryHelperTest extends TestCase
             ->structureContents(['root' => false]) // enable structure
             ->save();
 
-        // @phpstan-ignore-next-line
-        EntryFacade::make()
-            ->id('parent-id')
+        /** @var Entry $parentEntry */
+        $parentEntry = EntryFacade::make();
+
+        $parentEntry->id('parent-id')
             ->collection('pages')
             ->slug('parent')
             ->published(true)
             ->data(['title' => 'Parent'])
             ->save();
 
-        // @phpstan-ignore-next-line
-        EntryFacade::make()
+        /** @var Entry $childEntry */
+        $childEntry = EntryFacade::make();
+
+        $childEntry
             ->id('child-id')
             ->collection('pages')
             ->slug('child')
@@ -45,7 +49,7 @@ class EntryHelperTest extends TestCase
             ],
         ])->save();
 
-        /** @var \Statamic\Entries\Entry $parent */
+        /** @var Entry $parent */
         $parent = EntryFacade::find('parent-id');
 
         $this->assertSame(

@@ -52,9 +52,10 @@ class CreateDetoursFromEntryTest extends TestCase
             ->routes(['default' => '/{slug}'])
             ->save();
 
-        // @phpstan-ignore-next-line
-        EntryFacade::make()
-            ->id('::id::')
+        /** @var Entry $entry */
+        $entry = EntryFacade::make();
+
+        $entry->id('::id::')
             ->collection('pages')
             ->slug('old')
             ->published(true)
@@ -78,9 +79,10 @@ class CreateDetoursFromEntryTest extends TestCase
             ->routes(['default' => '/{slug}'])
             ->save();
 
-        // @phpstan-ignore-next-line
-        EntryFacade::make()
-            ->id('::id::')
+        /** @var Entry $entry */
+        $entry = EntryFacade::make();
+
+        $entry->id('::id::')
             ->collection('pages')
             ->slug('old')
             ->published(true)
@@ -91,8 +93,9 @@ class CreateDetoursFromEntryTest extends TestCase
         $entry = EntryFacade::find('::id::');
         $entry->slug('new');
 
-        // @phpstan-ignore-next-line
-        Blink::store('entry-uris')->forget($entry->id());
+        /** @var Blink $blinkCache */
+        $blinkCache = Blink::store('entry-uris');
+        $blinkCache->forget($entry->id());
 
         $this->assertSame('old', $entry->getOriginal('slug'));
         $this->assertSame('new', $entry->slug());
@@ -122,9 +125,10 @@ class CreateDetoursFromEntryTest extends TestCase
             ->routes(['default' => '/{slug}'])
             ->save();
 
-        // @phpstan-ignore-next-line
-        EntryFacade::make()
-            ->id('::id::')
+        /** @var Entry $entry */
+        $entry = EntryFacade::make();
+
+        $entry->id('::id::')
             ->collection('pages')
             ->slug('old')
             ->published(true)
@@ -135,8 +139,9 @@ class CreateDetoursFromEntryTest extends TestCase
         $entry = EntryFacade::find('::id::');
         $entry->slug('new');
 
-        // @phpstan-ignore-next-line
-        Blink::store('entry-uris')->forget($entry->id());
+        /** @var Blink $blinkCache */
+        $blinkCache = Blink::store('entry-uris');
+        $blinkCache->forget($entry->id());
 
         $this->assertSame('old', $entry->getOriginal('slug'));
         $this->assertSame('new', $entry->slug());

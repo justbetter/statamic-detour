@@ -21,9 +21,10 @@ class EntrySavedListenerTest extends TestCase
             ->routes(['default' => '/{slug}'])
             ->save();
 
-        // @phpstan-ignore-next-line
-        EntryFacade::make()
-            ->id('::id::')
+        /** @var Entry $entry */
+        $entry = EntryFacade::make();
+
+        $entry->id('::id::')
             ->collection('pages')
             ->slug('old')
             ->published(true)

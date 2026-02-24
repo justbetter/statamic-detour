@@ -17,13 +17,18 @@ class GetOldEntryUriTest extends TestCase
         Collection::make('pages')
             ->save();
 
-        // @phpstan-ignore-next-line
-        $entry = EntryFacade::make()
-            ->id('::id::no-uri::')
+        /** @var Entry $entry */
+        $entry = EntryFacade::make();
+
+        $entry->id('::id::no-uri::')
             ->collection('pages')
             ->slug('new')
             ->published(true)
-            ->data(['title' => '::title::']);
+            ->data(['title' => '::title::'])
+            ->save();
+
+        /** @var Entry $entry */
+        $entry = EntryFacade::find('::id::no-uri::');
 
         $action = app(GetsOldEntryUri::class);
 
@@ -37,9 +42,10 @@ class GetOldEntryUriTest extends TestCase
             ->routes(['default' => '/{slug}'])
             ->save();
 
-        // @phpstan-ignore-next-line
-        EntryFacade::make()
-            ->id('::id::unpublished::')
+        /** @var Entry $entry */
+        $entry = EntryFacade::make();
+
+        $entry->id('::id::unpublished::')
             ->collection('pages')
             ->slug('old')
             ->published(false)
@@ -62,9 +68,10 @@ class GetOldEntryUriTest extends TestCase
             ->routes(['default' => '/{slug}'])
             ->save();
 
-        // @phpstan-ignore-next-line
-        EntryFacade::make()
-            ->id('::id::original::')
+        /** @var Entry $entry */
+        $entry = EntryFacade::make();
+
+        $entry->id('::id::original::')
             ->collection('pages')
             ->slug('old')
             ->published(true)
@@ -87,13 +94,18 @@ class GetOldEntryUriTest extends TestCase
             ->routes(['default' => '/{slug}'])
             ->save();
 
-        // @phpstan-ignore-next-line
-        $entry = EntryFacade::make()
-            ->id('::id::fallback::')
+        /** @var Entry $entry */
+        $entry = EntryFacade::make();
+
+        $entry->id('::id::fallback::')
             ->collection('pages')
             ->slug('new')
             ->published(true)
-            ->data(['title' => '::title::']);
+            ->data(['title' => '::title::'])
+            ->save();
+
+        /** @var Entry $entry */
+        $entry = EntryFacade::find('::id::fallback::');
 
         $action = app(GetsOldEntryUri::class);
 
@@ -107,9 +119,10 @@ class GetOldEntryUriTest extends TestCase
             ->routes(['default' => '/new-parent/{slug}'])
             ->save();
 
-        // @phpstan-ignore-next-line
-        EntryFacade::make()
-            ->id('::id::parent::')
+        /** @var Entry $entry */
+        $entry = EntryFacade::make();
+
+        $entry->id('::id::parent::')
             ->collection('pages')
             ->slug('child-old')
             ->published(true)
