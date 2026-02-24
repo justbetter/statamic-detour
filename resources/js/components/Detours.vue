@@ -1,79 +1,161 @@
 <template>
     <div>
-        <publish-form :title="''" :action="action" :blueprint="blueprint" :meta="meta" :values="values" @saved="addItem($event)"></publish-form>
-        <table class="min-w-full border border-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">{{ __('From') }}</th>
-                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">{{ __('To') }}</th>
-                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">{{ __('Type') }}</th>
-                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">{{ __('Code') }}</th>
-                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">{{ __('Sites') }}</th>
-                    <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">{{ __('Delete') }}</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-                <tr class="hover:bg-gray-50 text-gray-900" v-for="(item, key) in detours" :key="item.id">
-                    <td class="px-4 py-3 text-sm">{{ item.from }}</td>
-                    <td class="px-4 py-3 text-sm">{{ item.to }}</td>
-                    <td class="px-4 py-3 text-sm">{{ item.type }}</td>
-                    <td class="px-4 py-3 text-sm font-medium">{{ item.code }}</td>
-                    <td class="px-4 py-3 text-sm space-x-2">
-
-                        <span class="rounded-full bg-green-500 text-white p-2" v-if="item.sites?.length === 0">{{ __('All') }}</span>
-                        <span class="rounded-full bg-green-500 text-white p-2" v-for="site in item.sites" v-else :key="site">{{ site }}</span>
-                    </td>
-                    <td class="px-4 py-3 text-right">
-                        <button
+        <DetourForm
+            :action="action"
+            :blueprint="blueprint"
+            :meta="meta"
+            :values="values"
+            @saved="addItem"
+        />
+        <Card>
+            <Table class="mt-6 min-w-full">
+                <TableRow>
+                    <TableCell class="font-semibold">{{ __('From') }}</TableCell>
+                    <TableCell class="font-semibold">{{ __('To') }}</TableCell>
+                    <TableCell class="font-semibold">{{ __('Type') }}</TableCell>
+                    <TableCell class="font-semibold">{{ __('Code') }}</TableCell>
+                    <TableCell class="font-semibold">{{ __('Sites') }}</TableCell>
+                    <TableCell class="text-right font-semibold">{{ __('Delete') }}</TableCell>
+                </TableRow>
+                <TableRow
+                    v-for="item in detours"
+                    :key="item.id"
+                    class="hover:bg-gray-50"
+                >
+                    <TableCell>{{ item.from }}</TableCell>
+                    <TableCell>{{ item.to }}</TableCell>
+                    <TableCell>{{ item.type }}</TableCell>
+                    <TableCell class="font-medium">{{ item.code }}</TableCell>
+                    <TableCell class="space-x-2">
+                        <Badge
+                            v-if="item.sites?.length === 0"
+                            color="green"
+                        >
+                            {{ __('All') }}
+                        </Badge>
+                        <Badge
+                            v-for="site in item.sites"
+                            v-else
+                            :key="site"
+                            color="green"
+                        >
+                            {{ site }}
+                        </Badge>
+                    </TableCell>
+                    <TableCell class="text-right">
+                        <Button
+                            variant="danger"
+                            size="sm"
+                            :text="__('Delete')"
                             @click="deleteDetour(item.id)"
-                            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-red-500 rounded hover:bg-red-400 focus:outline-none focus:ring-2 focus:ring-red-500">
-                            {{ __('Delete') }}
-                        </button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                        />
+                    </TableCell>
+                </TableRow>
+            </Table>
+        </Card>
+        <div v-if="paginatorMeta" class="mt-4">
+            <Pagination
+                :resource-meta="paginatorMeta"
+                :per-page="perPage"
+                @page-selected="selectPage"
+                @per-page-changed="selectPerPage"
+            />
+        </div>
     </div>
 </template>
+<script setup>
+import { ref, onMounted } from 'vue';
+import DetourForm from './DetourForm.vue';
+import {
+    Table,
+    TableRow,
+    TableCell,
+    Button,
+    Badge,
+    Card,
+    Pagination,
+} from '@statamic/cms/ui';
 
-<script>
-export default ({
-    props: {
-        action: String,
-        blueprint: Array,
-        meta: Array,
-        values: Array,
-        data: Array,
-        items: Array,
+const {
+    action,
+    blueprint,
+    meta,
+    values,
+    items,
+    paginatorMeta,
+    perPage,
+    indexUrl,
+} = defineProps({
+    action: {
+        type: String,
+        required: true,
     },
-
-    data() {
-        return {
-            detours: [],
-        }
+    blueprint: {
+        type: Object,
+        required: true,
     },
-
-    mounted() {
-        this.detours = this.items
+    meta: {
+        type: Object,
+        required: true,
     },
+    values: {
+        type: Object,
+        default: () => ({}),
+    },
+    data: {
+        type: Array,
+        default: () => [],
+    },
+    items: {
+        type: Array,
+        default: () => [],
+    },
+    paginatorMeta: {
+        type: Object,
+        default: null,
+    },
+    perPage: {
+        type: Number,
+        default: 15,
+    },
+    indexUrl: {
+        type: String,
+        default: '',
+    },
+});
 
-    methods: {
-        deleteItem(id) {
-            const index = this.detours.findIndex(item => item.id === id);
-            this.detours.splice(index, 1);
+const detours = ref([]);
 
-            this.$forceUpdate();
-        },
+onMounted(() => {
+    detours.value = items ?? [];
+});
 
-        addItem(event) {
-            this.detours.push(event.data);
-            this.$forceUpdate();
-        },
+const buildPaginatedUrl = (page, size) => {
+    const url = new URL(indexUrl, window.location.origin);
+    url.searchParams.set('size', size);
+    url.searchParams.set('page', page);
+    return url.toString();
+};
 
-        deleteDetour(id) {
-            const url = cp_url('/detours/' + id);
-            Statamic.$axios.delete(url).then(() => this.deleteItem(id));
-        },
-    }
-})
+const selectPage = (page) => {
+    window.location.href = buildPaginatedUrl(page, perPage);
+};
+
+const selectPerPage = (size) => {
+    window.location.href = buildPaginatedUrl(1, size);
+};
+
+const addItem = (data) => {
+    detours.value.push(data);
+};
+
+const deleteItem = (id) => {
+    const index = detours.value.findIndex((item) => item.id === id);
+    detours.value.splice(index, 1);
+};
+
+const deleteDetour = (id) => {
+    const url = cp_url('/detours/' + id);
+    Statamic.$axios.delete(url).then(() => deleteItem(id));
+};
 </script>

@@ -4,6 +4,7 @@ namespace JustBetter\Detour\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Statamic\Facades\Site;
 
 /**
  * @property string $from
@@ -35,7 +36,7 @@ class StoreRequest extends FormRequest
             'to' => 'present|string|starts_with:/',
             'type' => 'required|string|in:path,regex',
             'code' => 'required|integer',
-            'sites' => 'present|array',
+            'sites' => ['present', 'array', Rule::in(Site::all()->pluck('handle')->toArray())],
         ];
     }
 }
