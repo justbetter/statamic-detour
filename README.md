@@ -9,7 +9,7 @@ This Statamic addon provides a flexible redirect management system for your Stat
 
 * PHP ^8.3
 * Laravel ^12.0
-* Statamic ^5.67.0
+* Statamic ^6.3
 
 ## Features
 
@@ -167,6 +167,18 @@ This allows you to manage redirects per site in a multi-site Statamic installati
 - Better performance for large numbers of redirects
 - Recommended for sites with 100+ redirects
 - Supports faster lookups and queries
+
+## Development
+
+When developing this addon, you'll need to build the Control Panel assets. **Node.js 22+** is required for the build process:
+
+```bash
+cd /path/to/statamic-detour
+npm install
+npm run build
+```
+
+For hot reloading during development, run `npm run dev` in a separate terminal.
 
 ## Quality
 
