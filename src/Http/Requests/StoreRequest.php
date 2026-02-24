@@ -36,8 +36,7 @@ class StoreRequest extends FormRequest
             'to' => 'present|string|starts_with:/',
             'type' => 'required|string|in:path,regex',
             'code' => 'required|integer',
-            // @phpstan-ignore-next-line
-            'sites' => ['present', 'array', Rule::in(Site::all()->pluck('handle')->toArray())],
+            'sites' => 'present|array',
         ];
     }
 }
