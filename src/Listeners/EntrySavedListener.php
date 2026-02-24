@@ -2,17 +2,17 @@
 
 namespace JustBetter\Detour\Listeners;
 
-use JustBetter\Detour\Contracts\CreatesDetoursFromEvent;
+use JustBetter\Detour\Contracts\CreatesDetoursFromEntry;
 use Statamic\Events\EntrySaved;
 
 class EntrySavedListener
 {
     public function __construct(
-        protected CreatesDetoursFromEvent $contract,
+        protected CreatesDetoursFromEntry $contract,
     ) {}
 
     public function handle(EntrySaved $event): void
     {
-        $this->contract->createFromEntrySaved($event);
+        $this->contract->create($event->entry);
     }
 }

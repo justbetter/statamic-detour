@@ -18,7 +18,7 @@ abstract class BaseRepository
 
     abstract public function find(string $id): ?Detour;
 
-    abstract public function findBy(string $field, mixed $value): ?Detour;
+    abstract public function firstWhere(string $field, mixed $value): ?Detour;
 
     abstract public function store(Form $form): Detour;
 

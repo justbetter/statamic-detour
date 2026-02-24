@@ -6,5 +6,5 @@ use JustBetter\Detour\Data\Detour;
 
 interface FindsDetour
 {
-    public function findBy(string $field, mixed $value): ?Detour;
+    public function firstWhere(string $field, mixed $value): ?Detour;
 }

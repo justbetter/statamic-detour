@@ -18,7 +18,7 @@ class FindDetourTest extends TestCase
     }
 
     #[Test]
-    public function it_can_find_a_detour(): void
+    public function it_can_find_a_detour_by_field(): void
     {
         $action = app(FindsDetour::class);
 
@@ -29,7 +29,7 @@ class FindDetourTest extends TestCase
             'type' => Type::Path,
         ]);
 
-        $result = $action->findBy('from', '::from::');
+        $result = $action->firstWhere('from', '::from::');
 
         $this->assertNotNull($result);
         $this->assertEquals($createdDetour->id, $result->id);

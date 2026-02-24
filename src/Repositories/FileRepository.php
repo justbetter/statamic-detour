@@ -67,7 +67,7 @@ class FileRepository extends BaseRepository
         return Detour::make(['id' => $id, ...$data]);
     }
 
-    public function findBy(string $field, mixed $value): ?Detour
+    public function firstWhere(string $field, mixed $value): ?Detour
     {
         return $this->get()->firstWhere($field, $value);
     }

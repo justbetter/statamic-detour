@@ -65,6 +65,25 @@ class EloquentDetourRepositoryTest extends TestCase
     }
 
     #[Test]
+    public function it_can_be_queried_by_first_where_function(): void
+    {
+        $contract = app(ResolveRepository::class);
+        $repository = $contract->resolve();
+
+        $createdDetour = DetourModel::create([
+            'from' => '::from::',
+            'to' => '::to::',
+            'code' => '302',
+            'type' => Type::Path,
+        ]);
+
+        /** @var Detour $foundDetour */
+        $foundDetour = $repository->firstWhere('from', '::from::');
+
+        $this->assertSame($createdDetour->id, $foundDetour->id);
+    }
+
+    #[Test]
     public function it_can_be_deleted(): void
     {
         $contract = app(ResolveRepository::class);

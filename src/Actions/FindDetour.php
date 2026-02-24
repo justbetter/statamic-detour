@@ -12,11 +12,11 @@ class FindDetour implements FindsDetour
         protected ResolvesRepository $resolvesRepository
     ) {}
 
-    public function findBy(string $field, mixed $value): ?Detour
+    public function firstWhere(string $field, mixed $value): ?Detour
     {
         $repository = $this->resolvesRepository->resolve();
 
-        return $repository->findBy($field, $value);
+        return $repository->firstWhere($field, $value);
     }
 
     public static function bind(): void

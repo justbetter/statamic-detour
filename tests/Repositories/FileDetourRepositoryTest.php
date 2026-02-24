@@ -61,6 +61,26 @@ class FileDetourRepositoryTest extends TestCase
     }
 
     #[Test]
+    public function it_can_find_the_first_match_for_a_field(): void
+    {
+        $contract = app(ResolveRepository::class);
+        $repository = $contract->resolve();
+
+        $data = Form::make([
+            'from' => '::from::',
+            'to' => '::to::',
+            'code' => '302',
+            'type' => Type::Path,
+        ]);
+
+        $repository->store($data);
+
+        $found = $repository->firstWhere('from', '::from::');
+
+        $this->assertInstanceOf(Detour::class, $found);
+    }
+
+    #[Test]
     public function it_returns_null_if_not_found(): void
     {
         $contract = app(ResolveRepository::class);
