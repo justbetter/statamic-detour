@@ -4,7 +4,6 @@ namespace JustBetter\Detour\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Statamic\Facades\Site;
 
 /**
  * @property string $from
