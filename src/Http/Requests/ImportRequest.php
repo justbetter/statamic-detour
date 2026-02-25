@@ -45,13 +45,18 @@ class ImportRequest extends FormRequest
                 return;
             }
 
-            $headers = array_map(function ($header) {
-                $value = is_string($header) ? trim($header) : '';
+            $headers = collect($headers)
+                ->map(function ($header) {
+                    $value = is_string($header) ? trim($header) : '';
 
-                return preg_replace('/^\xEF\xBB\xBF/', '', $value) ?? $value;
-            }, $headers);
+                    return preg_replace('/^\xEF\xBB\xBF/', '', $value) ?? $value;
+                })
+                ->all();
 
-            $missingHeaders = array_values(array_diff($this->requiredHeaders, $headers));
+            $missingHeaders = collect($this->requiredHeaders)
+                ->diff($headers)
+                ->values()
+                ->all();
 
             if ($missingHeaders !== []) {
                 $validator->errors()->add(
