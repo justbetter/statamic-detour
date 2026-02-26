@@ -13,16 +13,18 @@ class ImportDetour implements ImportsDetour
     public function import(array $data): void
     {
         /** @var string $sites */
-        $sites = isset($data['sites']) ? $data['sites'] : '';
+        $sites = $data['sites'] ?? '';
         $data['sites'] = $sites ? explode(';', $sites) : '';
+        try {
+            $data = Form::make($data)->validate();
 
-        $data = Form::make($data);
-
-        $repository = $this->resolvesRepository->resolve();
-        if ($data->id) {
-            $repository->update($data->id, $data);
-        } else {
-            $repository->store($data);
+            $repository = $this->resolvesRepository->resolve();
+            if ($data->id) {
+                $repository->update($data->id, $data);
+            } else {
+                $repository->store($data);
+            }
+        } catch (\Throwable $e) {
         }
     }
 
