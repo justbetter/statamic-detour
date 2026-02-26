@@ -117,6 +117,21 @@ Or set via environment variable:
 STATAMIC_DETOUR_MODE=performance
 ```
 
+### Auto create
+Redirects are automatically created whenever an entry's slug is changed. If you change the slug of a parent, this change will also be reflected in its children.
+
+```php
+return [
+    'auto_create' => true,
+];
+```
+
+Or set via environment variable:
+
+```env
+STATAMIC_DETOUR_AUTO_CREATE=true
+```
+
 ## Usage
 
 ### Creating Redirects

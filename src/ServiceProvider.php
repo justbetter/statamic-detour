@@ -3,9 +3,12 @@
 namespace JustBetter\Detour;
 
 use Illuminate\Routing\Router;
+use JustBetter\Detour\Actions\CreateDetoursFromEntry;
 use JustBetter\Detour\Actions\DeleteDetour;
 use JustBetter\Detour\Actions\ExportDetours;
+use JustBetter\Detour\Actions\FindDetour;
 use JustBetter\Detour\Actions\GenerateUrl;
+use JustBetter\Detour\Actions\GetOldEntryUri;
 use JustBetter\Detour\Actions\ImportDetour;
 use JustBetter\Detour\Actions\ImportDetours;
 use JustBetter\Detour\Actions\ListDetours;
@@ -60,6 +63,9 @@ class ServiceProvider extends AddonServiceProvider
         GenerateUrl::bind();
         ImportDetours::bind();
         ImportDetour::bind();
+        FindDetour::bind();
+        CreateDetoursFromEntry::bind();
+        GetOldEntryUri::bind();
 
         FileRepository::bind();
 

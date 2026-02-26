@@ -16,6 +16,8 @@ return [
 
     'mode' => env('STATAMIC_DETOUR_MODE', 'basic'), // basic | performance
 
+    'auto_create' => env('STATAMIC_DETOUR_AUTO_CREATE', true),
+
     'actions' => [
         'disk' => 'local',
     ],
