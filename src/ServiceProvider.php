@@ -97,7 +97,7 @@ class ServiceProvider extends AddonServiceProvider
     protected function bootConfig(): static
     {
         $this->publishes([
-            __DIR__.'/../config/statamic-detour.php' => config_path('statamic-detour.php'),
+            __DIR__.'/../config/statamic-detour.php' => config_path('justbetter/statamic-detour.php'),
         ], 'justbetter-statamic-detour');
 
         return $this;
