@@ -10,9 +10,7 @@ class GetOldEntryUri implements GetsOldEntryUri
 {
     public function get(Entry $entry, ?string $parentOldSlug = null, ?string $parentNewSlug = null): ?string
     {
-        $uri = $entry->uri();
-
-        if (! $uri || ! $entry->published()) {
+        if (! ($uri = $entry->uri()) || ! $entry->published()) {
             return null;
         }
 
