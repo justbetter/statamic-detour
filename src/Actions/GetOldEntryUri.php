@@ -10,10 +10,9 @@ class GetOldEntryUri implements GetsOldEntryUri
 {
     public function get(Entry $entry, ?string $parentOldSlug = null, ?string $parentNewSlug = null): ?string
     {
-        if (! $uri = $entry->uri()) {
-            return null;
-        }
-        if (! $entry->published()) {
+        $uri = $entry->uri();
+
+        if (! $uri || ! $entry->published()) {
             return null;
         }
 
@@ -24,7 +23,7 @@ class GetOldEntryUri implements GetsOldEntryUri
         $oldUri = "$uriWithoutSlug/$slug";
 
         if ($parentOldSlug && $parentNewSlug) {
-            $oldUri = str_replace($parentNewSlug, $parentOldSlug, $oldUri);
+            $oldUri = Str::replace($parentNewSlug, $parentOldSlug, $oldUri);
         }
 
         return $oldUri;
