@@ -13,6 +13,13 @@ use PHPUnit\Framework\Attributes\Test;
 
 class FileDetourRepositoryTest extends TestCase
 {
+    protected function defineEnvironment($app): void
+    {
+        parent::defineEnvironment($app);
+
+        $app['config']->set('justbetter.statamic-detour.driver', 'file');
+    }
+
     #[Test]
     public function it_can_be_queried(): void
     {
@@ -49,6 +56,26 @@ class FileDetourRepositoryTest extends TestCase
         $detour = $repository->store($data);
 
         $found = $repository->find($detour->id);
+
+        $this->assertInstanceOf(Detour::class, $found);
+    }
+
+    #[Test]
+    public function it_can_find_the_first_match_for_a_field(): void
+    {
+        $contract = app(ResolveRepository::class);
+        $repository = $contract->resolve();
+
+        $data = Form::make([
+            'from' => '::from::',
+            'to' => '::to::',
+            'code' => '302',
+            'type' => Type::Path,
+        ]);
+
+        $repository->store($data);
+
+        $found = $repository->firstWhere('from', '::from::');
 
         $this->assertInstanceOf(Detour::class, $found);
     }
