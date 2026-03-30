@@ -15,9 +15,12 @@ use JustBetter\Detour\Actions\ListDetours;
 use JustBetter\Detour\Actions\MatchDetour;
 use JustBetter\Detour\Actions\ResolveRepository;
 use JustBetter\Detour\Actions\StoreDetour;
+use JustBetter\Detour\Http\Middleware\AuthorizeDetours;
 use JustBetter\Detour\Http\Middleware\RedirectIfNeeded;
 use JustBetter\Detour\Repositories\FileRepository;
+use Statamic\Auth\Permission;
 use Statamic\Facades\CP\Nav;
+use Statamic\Facades\Permission as PermissionFacade;
 use Statamic\Providers\AddonServiceProvider;
 
 class ServiceProvider extends AddonServiceProvider
@@ -76,6 +79,9 @@ class ServiceProvider extends AddonServiceProvider
     {
         $this->app->booted(function () {
             $router = app(Router::class);
+
+            $router->aliasMiddleware('detours.access', AuthorizeDetours::class);
+
             if (config('justbetter.statamic-detour.mode') === 'performance') {
                 $router->pushMiddlewareToGroup('web', RedirectIfNeeded::class);
             } else {
@@ -90,6 +96,7 @@ class ServiceProvider extends AddonServiceProvider
     {
         $this
             ->bootConfig()
+            ->bootPermissions()
             ->bootNavigation()
             ->bootMigrations();
     }
@@ -110,13 +117,29 @@ class ServiceProvider extends AddonServiceProvider
                 $nav->content('Overview')
                     ->section('Detours')
                     ->route('justbetter.detours.index')
-                    ->icon('<svg class="svg-icon" style="width: 2em; height: 2em;vertical-align: middle;text-align:center;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M653.328 125.024l-56.576 56.704L734.88 320H399.68C240.88 320 112 448.992 112 607.776c0 158.816 128 287.952 288 287.952v-80c-112 0-208-93.312-208-208.016 0-114.688 93.152-208 207.84-208h334.96l-137.888 137.856 56.528 56.56 234.48-234.496L653.344 125.024z" fill="#565D64" /></svg>');
+                    ->can(config()->string('justbetter.statamic-detour.permissions.access'))
+                    ->icon('<svg class="svg-icon" style="width: 1.25em; height: 1.25em;vertical-align: middle;text-align:center;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M653.328 125.024l-56.576 56.704L734.88 320H399.68C240.88 320 112 448.992 112 607.776c0 158.816 128 287.952 288 287.952v-80c-112 0-208-93.312-208-208.016 0-114.688 93.152-208 207.84-208h334.96l-137.888 137.856 56.528 56.56 234.48-234.496L653.344 125.024z" fill="#565D64" /></svg>');
 
                 $nav->content('Import / Export')
                     ->section('Detours')
                     ->route('justbetter.detours.actions.index')
+                    ->can(config()->string('justbetter.statamic-detour.permissions.access'))
                     ->icon('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v12"/><path d="M4 13l3 3 3-3"/><path d="M17 20V8"/><path d="M14 11l3-3 3 3"/></svg>');
             });
+
+        return $this;
+    }
+
+    protected function bootPermissions(): static
+    {
+        PermissionFacade::group('detours', 'Detours', function () {
+            $permission = config()->string('justbetter.statamic-detour.permissions.access');
+            PermissionFacade::register($permission, function (Permission $permission) {
+                $permission
+                    ->label('Access detours')
+                    ->description('Gives the user access to managing detours (view, create, delete)');
+            });
+        });
 
         return $this;
     }

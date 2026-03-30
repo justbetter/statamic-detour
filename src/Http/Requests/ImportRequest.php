@@ -2,6 +2,7 @@
 
 namespace JustBetter\Detour\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\Validator;
@@ -16,7 +17,7 @@ class ImportRequest extends FormRequest
     protected array $requiredHeaders = ['from', 'to', 'type', 'code'];
 
     /**
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {

@@ -23,4 +23,8 @@ return [
     ],
 
     'queue' => 'default',
+
+    'permissions' => [
+        'access' => 'access detours',
+    ],
 ];
