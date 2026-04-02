@@ -10,12 +10,19 @@ use JustBetter\Detour\Http\Controllers\DetourController;
 use JustBetter\Detour\Http\Requests\IndexRequest;
 use JustBetter\Detour\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Statamic\Facades\User;
 
 class DetourControllerTest extends TestCase
 {
     #[Test]
     public function it_can_load_a_view(): void
     {
+        /** @var \Statamic\Auth\File\User $user */
+        $user = User::make();
+        $user->id('test-user')->email('test@example.com')->makeSuper();
+
+        $this->actingAs($user);
+
         $controller = app(DetourController::class);
         $contract = app(ListsDetours::class);
         $request = IndexRequest::create('/cp/detours', 'GET');
