@@ -18,6 +18,7 @@ This Statamic addon provides a flexible redirect management system for your Stat
 * **Storage Driver**: Option to store redirects in flat files (YAML) for version control OR Database for performance on massive sites
 * **Path & Regex Support**: Create redirects using simple paths or powerful regex patterns
 * **Multiple Redirect Codes**: Support for 301, 302, 307, and 308 redirect codes
+* **Query String Handling**: Pass through, strip completely, or strip specific keys (for example `gclid`)
 * **Control Panel Interface**: Manage redirects directly from the Statamic Control Panel
 
 ## Installation
@@ -132,6 +133,19 @@ Or set via environment variable:
 STATAMIC_DETOUR_AUTO_CREATE=true
 ```
 
+### Query string defaults
+
+Set global defaults for query string handling:
+
+```php
+return [
+    'query_string_default_handling' => 'strip_completely', // pass_through | strip_completely | strip_specific_keys
+    'query_string_default_strip_keys' => 'gclid,fbclid',
+];
+```
+
+You can also configure these from **Tools > Detours > Settings** in the Control Panel.
+
 ## Usage
 
 ### Creating Redirects
@@ -147,6 +161,7 @@ Create simple path-based redirects:
 - **Type**: Path
 - **Code**: 301 (or 302, 307, 308)
 - **Sites**: Leave empty for global, or select specific sites
+- **Query string handling**: Use global default, pass through, strip completely, or strip specific keys
 
 #### Regex Redirects
 
@@ -157,6 +172,7 @@ Create powerful pattern-based redirects:
 - **Type**: Regex
 - **Code**: 301
 - **Sites**: Select specific sites if needed
+- **Query string handling**: Same options as path redirects
 
 ### Multi-Site Support
 
@@ -213,6 +229,7 @@ This will execute three tasks:
 
 - [Bob Wezelman](https://github.com/BobWez98)
 - [Niek Boon](https://github.com/niekboon)
+- [Kevin Meijer](https://github.com/kevinmeijer97)
 - [All Contributors](../../contributors)
 
 ## Contributing
