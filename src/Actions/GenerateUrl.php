@@ -38,7 +38,8 @@ class GenerateUrl implements GeneratesUrl
      */
     protected function appendQueryString(string $url, Detour $detour, array $queryParameters): string
     {
-        $rawHandling = (string) $detour->get('query_string_handling');
+        $rawHandlingValue = $detour->get('query_string_handling');
+        $rawHandling = is_string($rawHandlingValue) ? $rawHandlingValue : '';
 
         $handling = ($rawHandling === '' || $rawHandling === 'use_global')
             ? null

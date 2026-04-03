@@ -13,8 +13,9 @@ class DetourSettings
     {
         $rawValue = $this->all()['query_string_default_handling']
             ?? config()->string('justbetter.statamic-detour.query_string_default_handling');
+        $rawValue = is_string($rawValue) ? $rawValue : '';
 
-        return QueryStringHandling::tryFrom((string) $rawValue)
+        return QueryStringHandling::tryFrom($rawValue)
             ?? QueryStringHandling::StripCompletely;
     }
 
@@ -22,8 +23,9 @@ class DetourSettings
     {
         $rawValue = $this->all()['query_string_default_strip_keys']
             ?? config()->string('justbetter.statamic-detour.query_string_default_strip_keys');
+        $rawValue = is_string($rawValue) ? $rawValue : '';
 
-        return trim((string) $rawValue);
+        return trim($rawValue);
     }
 
     public function update(QueryStringHandling $handling, string $stripKeys): void
@@ -56,8 +58,8 @@ class DetourSettings
     protected function all(): array
     {
         if ($this->usesEloquentDriver()) {
-            return DetourSetting::all()
-                ->mapWithKeys(fn (DetourSetting $setting): array => [$setting->key => $setting->value])
+            return DetourSetting::query()
+                ->pluck('value', 'key')
                 ->all();
         }
 
@@ -67,9 +69,10 @@ class DetourSettings
             return [];
         }
 
+        /** @var array<string, mixed> $data */
         $data = YAML::parse(File::get($path));
 
-        return is_array($data) ? $data : [];
+        return $data;
     }
 
     protected function usesEloquentDriver(): bool
