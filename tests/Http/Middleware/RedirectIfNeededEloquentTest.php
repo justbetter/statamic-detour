@@ -2,7 +2,10 @@
 
 namespace JustBetter\Detour\Tests\Http\Middleware;
 
+use Illuminate\Support\Facades\File;
+use JustBetter\Detour\Enums\QueryStringHandling;
 use JustBetter\Detour\Models\Detour;
+use JustBetter\Detour\Support\DetourSettings;
 use JustBetter\Detour\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -13,6 +16,14 @@ class RedirectIfNeededEloquentTest extends TestCase
         parent::defineEnvironment($app);
 
         $app['config']->set('justbetter.statamic-detour.driver', 'eloquent');
+        $app['config']->set('justbetter.statamic-detour.settings_path', __DIR__.'/../../__fixtures__/settings.yaml');
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        File::delete(__DIR__.'/../../__fixtures__/settings.yaml');
     }
 
     protected function defineRoutes($router)
@@ -121,6 +132,121 @@ class RedirectIfNeededEloquentTest extends TestCase
 
         $this->get('/blog/2024/01/hello-world')
             ->assertRedirect('/articles/2024/01/hello-world')
+            ->assertStatus(301);
+    }
+
+    #[Test]
+    public function it_passes_through_query_parameters_when_enabled(): void
+    {
+        Detour::create([
+            'from' => '/::from::',
+            'to' => '/::to::',
+            'type' => 'path',
+            'code' => '301',
+            'sites' => [],
+            'query_string_handling' => 'pass_through',
+        ]);
+
+        $this->get('/::from::?utm_source=test&gclid=123')
+            ->assertRedirect('/::to::?utm_source=test&gclid=123')
+            ->assertStatus(301);
+    }
+
+    #[Test]
+    public function it_strips_query_parameters_by_default(): void
+    {
+        Detour::create([
+            'from' => '/::from::',
+            'to' => '/::to::',
+            'type' => 'path',
+            'code' => '301',
+            'sites' => [],
+        ]);
+
+        $this->get('/::from::?utm_source=test&gclid=123')
+            ->assertRedirect('/::to::')
+            ->assertStatus(301);
+    }
+
+    #[Test]
+    public function it_strips_specific_query_keys_when_configured(): void
+    {
+        Detour::create([
+            'from' => '/::from::',
+            'to' => '/::to::',
+            'type' => 'path',
+            'code' => '301',
+            'sites' => [],
+            'query_string_handling' => 'strip_specific_keys',
+            'query_string_strip_keys' => 'gclid, fbclid',
+        ]);
+
+        $this->get('/::from::?utm_source=test&gclid=123&fbclid=234')
+            ->assertRedirect('/::to::?utm_source=test')
+            ->assertStatus(301);
+    }
+
+    #[Test]
+    public function it_uses_the_global_default_query_string_handling_when_detour_has_no_override(): void
+    {
+        app(DetourSettings::class)->update(
+            QueryStringHandling::PassThrough,
+            ''
+        );
+
+        Detour::create([
+            'from' => '/::from::',
+            'to' => '/::to::',
+            'type' => 'path',
+            'code' => '301',
+            'sites' => [],
+        ]);
+
+        $this->get('/::from::?utm_source=test&gclid=123')
+            ->assertRedirect('/::to::?utm_source=test&gclid=123')
+            ->assertStatus(301);
+    }
+
+    #[Test]
+    public function it_uses_global_strip_keys_when_detour_uses_global_mode(): void
+    {
+        app(DetourSettings::class)->update(
+            QueryStringHandling::StripSpecificKeys,
+            'gclid,fbclid'
+        );
+
+        Detour::create([
+            'from' => '/::from::',
+            'to' => '/::to::',
+            'type' => 'path',
+            'code' => '301',
+            'sites' => [],
+        ]);
+
+        $this->get('/::from::?utm_source=test&gclid=123&fbclid=234')
+            ->assertRedirect('/::to::?utm_source=test')
+            ->assertStatus(301);
+    }
+
+    #[Test]
+    public function it_uses_global_default_when_detour_explicitly_uses_global(): void
+    {
+        app(DetourSettings::class)->update(
+            QueryStringHandling::PassThrough,
+            ''
+        );
+
+        Detour::create([
+            'from' => '/::from::',
+            'to' => '/::to::',
+            'type' => 'path',
+            'code' => '301',
+            'sites' => [],
+            'query_string_handling' => 'use_global',
+        ]);
+
+        $this->get('/::from::?utm_source=test&gclid=123')
+            ->assertRedirect('/::to::?utm_source=test&gclid=123')
             ->assertStatus(301);
     }
 }

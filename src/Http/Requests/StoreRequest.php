@@ -37,6 +37,12 @@ class StoreRequest extends FormRequest
             'type' => 'required|string|in:path,regex',
             'code' => 'required|integer',
             'sites' => 'present|array',
+            'query_string_handling' => 'sometimes|string|in:use_global,pass_through,strip_completely,strip_specific_keys',
+            'query_string_strip_keys' => [
+                'nullable',
+                'string',
+                Rule::requiredIf($this->input('query_string_handling') === 'strip_specific_keys'),
+            ],
         ];
     }
 }

@@ -49,7 +49,14 @@ const containerName = Statamic.$slug.separatedBy('_').create('detour-form');
 const container = useTemplateRef('container');
 const errors = ref({});
 const saving = ref(false);
-const values = ref(propValues);
+const defaultValues = () => ({
+    query_string_handling: 'use_global',
+});
+
+const values = ref({
+    ...defaultValues(),
+    ...propValues,
+});
 const save = () => {
     new Pipeline()
         .provide({ container, errors, saving })
@@ -57,7 +64,7 @@ const save = () => {
         .then((response) => {
             Statamic.$toast.success(__('Saved'));
             emit('saved', response.data);
-            values.value = {};
+            values.value = defaultValues();
         });
 };
 </script>

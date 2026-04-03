@@ -41,6 +41,7 @@ class DetourControllerTest extends TestCase
             'code' => '302',
             'type' => 'path',
             'sites' => [],
+            'query_string_handling' => 'use_global',
         ]);
 
         $response->assertOk();
@@ -72,6 +73,19 @@ class DetourControllerTest extends TestCase
         $response2->assertUnprocessable();
         $response2->assertJsonValidationErrors(['from']);
         $response2->assertJsonMissingValidationErrors(['to']);
+
+        $response3 = $this->withoutMiddleware()->postJson(cp_route('justbetter.detours.store'), [
+            'from' => '/::from::',
+            'to' => '/::to::',
+            'code' => '302',
+            'type' => 'path',
+            'sites' => [],
+            'query_string_handling' => 'strip_specific_keys',
+            'query_string_strip_keys' => null,
+        ]);
+
+        $response3->assertUnprocessable();
+        $response3->assertJsonValidationErrors(['query_string_strip_keys']);
     }
 
     #[Test]

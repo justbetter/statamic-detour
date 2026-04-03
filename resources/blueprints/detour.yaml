@@ -79,4 +79,37 @@ tabs:
               visibility: visible
               replicator_preview: true
               hide_display: false
+              width: 100
+          -
+            handle: query_string_handling
+            field:
+              options:
+                -
+                  key: use_global
+                  value: Use global default
+                -
+                  key: pass_through
+                  value: Pass through
+                -
+                  key: strip_completely
+                  value: Strip completely
+                -
+                  key: strip_specific_keys
+                  value: Strip specific keys
+              max_items: 1
+              default: use_global
+              type: select
+              display: Query string handling
+              instructions: Use global default configured on the settings page or override it for this detour.
+              localizable: false
               width: 50
+          -
+            handle: query_string_strip_keys
+            field:
+              type: text
+              display: Query string keys to strip
+              instructions: Comma-separated list, e.g. gclid,fbclid
+              localizable: false
+              width: 50
+              if:
+                query_string_handling: strip_specific_keys

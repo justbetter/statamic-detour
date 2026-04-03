@@ -22,7 +22,7 @@ class RedirectIfNeeded
         $detour = $this->matcher->match($path);
 
         if ($detour) {
-            $url = $this->generator->generate($detour, $path);
+            $url = $this->generator->generate($detour, $path, $request->query());
 
             return $url ? redirect()->to($url, $detour->code) : $next($request);
         }
