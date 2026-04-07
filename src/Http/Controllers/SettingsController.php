@@ -17,11 +17,13 @@ class SettingsController
 
         return view($view, [
             'settingsAction' => cp_route('justbetter.detours.settings.update'),
-            'handlingOptions' => [
-                ['label' => __('Pass through'), 'value' => 'pass_through'],
-                ['label' => __('Strip completely'), 'value' => 'strip_completely'],
-                ['label' => __('Strip specific keys'), 'value' => 'strip_specific_keys'],
-            ],
+            'handlingOptions' => array_map(
+                fn (QueryStringHandling $handling): array => [
+                    'label' => $this->labelForHandling($handling),
+                    'value' => $handling->value,
+                ],
+                QueryStringHandling::cases()
+            ),
             'queryStringDefaultHandling' => $settings->defaultQueryStringHandling()->value,
             'queryStringDefaultStripKeys' => $settings->defaultQueryStringStripKeys(),
         ]);
@@ -37,5 +39,14 @@ class SettingsController
         Toast::success(__('Settings saved.'));
 
         return redirect()->route('statamic.cp.justbetter.detours.settings.index');
+    }
+
+    protected function labelForHandling(QueryStringHandling $handling): string
+    {
+        return match ($handling) {
+            QueryStringHandling::PassThrough => __('Pass through'),
+            QueryStringHandling::StripCompletely => __('Strip completely'),
+            QueryStringHandling::StripSpecificKeys => __('Strip specific keys'),
+        };
     }
 }

@@ -24,7 +24,7 @@
                 name="query_string_default_strip_keys"
                 type="text"
                 class="mt-2"
-                v-model="stripKeys"
+                v-model="stripKeysValue"
             />
             <p class="text-sm text-gray-700 dark:text-gray-300 mt-2">
                 {{ __('Comma-separated list, e.g. gclid,fbclid') }}
@@ -41,7 +41,7 @@
 import { computed, ref } from 'vue';
 import { Button, Field, Input, Label, Select } from '@statamic/cms/ui';
 
-const props = defineProps({
+const { selectedHandling, stripKeys } = defineProps({
     action: {
         type: String,
         required: true,
@@ -64,8 +64,8 @@ const props = defineProps({
     },
 });
 
-const handling = ref(props.selectedHandling);
-const stripKeys = ref(props.stripKeys);
+const handling = ref(selectedHandling);
+const stripKeysValue = ref(stripKeys);
 const handlingValue = computed(() => {
     if (typeof handling.value === 'string') {
         return handling.value;
