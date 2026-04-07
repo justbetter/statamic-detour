@@ -19,7 +19,7 @@ class SettingsController
             'settingsAction' => cp_route('justbetter.detours.settings.update'),
             'handlingOptions' => array_map(
                 fn (QueryStringHandling $handling): array => [
-                    'label' => $this->labelForHandling($handling),
+                    'label' => $handling->label(),
                     'value' => $handling->value,
                 ],
                 QueryStringHandling::cases()
@@ -39,14 +39,5 @@ class SettingsController
         Toast::success(__('Settings saved.'));
 
         return redirect()->route('statamic.cp.justbetter.detours.settings.index');
-    }
-
-    protected function labelForHandling(QueryStringHandling $handling): string
-    {
-        return match ($handling) {
-            QueryStringHandling::PassThrough => __('Pass through'),
-            QueryStringHandling::StripCompletely => __('Strip completely'),
-            QueryStringHandling::StripSpecificKeys => __('Strip specific keys'),
-        };
     }
 }
