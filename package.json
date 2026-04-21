@@ -9,7 +9,8 @@
         "@statamic/cms": "file:./vendor/statamic/cms/resources/dist-package",
         "@tailwindcss/vite": "^4.1.18",
         "laravel-vite-plugin": "^2.0.1",
-        "tailwindcss": "^4.1.18"
+        "tailwindcss": "^4.1.18",
+        "vue": "^3.5.31"
     },
     "devDependencies": {
         "vite": "^6.3.4"
