@@ -20,7 +20,7 @@
                 <TableRow
                     v-for="item in detours"
                     :key="item.id"
-                    class="hover:bg-gray-50"
+                    class="hover:bg-gray-50 dark:hover:bg-gray-900"
                 >
                     <TableCell>{{ item.from }}</TableCell>
                     <TableCell>{{ item.to }}</TableCell>
@@ -64,7 +64,7 @@
     </div>
 </template>
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, getCurrentInstance } from 'vue';
 import DetourForm from './DetourForm.vue';
 import {
     Table,
@@ -125,6 +125,8 @@ const {
 });
 
 const detours = ref([]);
+const app = getCurrentInstance();
+const axiosClient = app?.appContext.config.globalProperties.$axios;
 
 onMounted(() => {
     detours.value = items ?? [];
@@ -156,6 +158,6 @@ const deleteItem = (id) => {
 
 const deleteDetour = (id) => {
     const url = cp_url('/detours/' + id);
-    Statamic.$axios.delete(url).then(() => deleteItem(id));
+    axiosClient.delete(url).then(() => deleteItem(id));
 };
 </script>

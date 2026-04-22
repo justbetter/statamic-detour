@@ -6,5 +6,8 @@ use JustBetter\Detour\Data\Detour;
 
 interface GeneratesUrl
 {
-    public function generate(Detour $detour, string $path): ?string;
+    /**
+     * @param  array<string, mixed>  $queryParameters
+     */
+    public function generate(Detour $detour, string $path, array $queryParameters = []): ?string;
 }

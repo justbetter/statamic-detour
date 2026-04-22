@@ -12,6 +12,8 @@ use JustBetter\Detour\Enums\Type;
  * @property string $type
  * @property int $code
  * @property array<int, string> $sites
+ * @property string $query_string_handling
+ * @property string $query_string_strip_keys
  *
  * @extends Data<string, mixed>
  */
@@ -32,6 +34,8 @@ class Form extends Data
             'code' => 'required|integer|in:301,302,307,308',
             'sites' => 'sometimes|array',
             'sites.*' => 'string',
+            'query_string_handling' => 'sometimes|string|in:use_global,pass_through,strip_completely,strip_specific_keys',
+            'query_string_strip_keys' => 'sometimes|string',
         ];
     }
 }

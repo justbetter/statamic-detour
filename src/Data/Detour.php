@@ -11,6 +11,8 @@ use JustBetter\Detour\Enums\Type;
  * @property string $type
  * @property int $code
  * @property array<int, string> $sites
+ * @property string $query_string_handling
+ * @property string $query_string_strip_keys
  *
  * @extends Data<string, mixed>
  */

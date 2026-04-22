@@ -15,6 +15,10 @@ class StoreDetour implements StoresDetour
 
     public function store(Form $form): Detour
     {
+        if (! $form->has('query_string_handling')) {
+            $form->set('query_string_handling', 'use_global');
+        }
+
         $repository = $this->resolvesRepository->resolve();
 
         return $repository->store($form);

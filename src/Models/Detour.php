@@ -13,6 +13,8 @@ use JustBetter\Detour\Enums\Type;
  * @property Type $type
  * @property int $code
  * @property array<int, string> $sites
+ * @property string $query_string_handling
+ * @property ?string $query_string_strip_keys
  */
 class Detour extends Model
 {
