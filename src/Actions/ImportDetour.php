@@ -14,7 +14,7 @@ class ImportDetour implements ImportsDetour
     {
         /** @var string $sites */
         $sites = $data['sites'] ?? '';
-        $data['sites'] = $sites ? explode(';', $sites) : '';
+        $data['sites'] = $sites ? explode(';', $sites) : [];
         $data['query_string_handling'] = $data['query_string_handling']
             ?? 'use_global';
         try {

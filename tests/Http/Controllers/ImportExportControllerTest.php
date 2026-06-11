@@ -26,13 +26,17 @@ class ImportExportControllerTest extends TestCase
     public function it_can_export_detours(): void
     {
         $path = tempnam(sys_get_temp_dir(), 'export');
+        file_put_contents($path, 'id,from,to');
 
         $this->mock(ExportsDetours::class, function (MockInterface $mock) use ($path) {
             $mock->shouldReceive('export')->once()->andReturn($path);
         });
 
-        $controller = app(ImportExportController::class);
-        $controller->export(app(ExportsDetours::class));
+        $response = $this
+            ->withoutMiddleware()
+            ->get(cp_route('justbetter.detours.actions.export'));
+
+        $response->assertDownload('detours-'.now()->format('Y-m-d').'.csv');
     }
 
     #[Test]

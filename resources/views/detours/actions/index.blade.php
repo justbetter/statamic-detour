@@ -59,6 +59,7 @@
     >
         <div class="mt-6 flex flex-col sm:flex-row gap-3">
             <ui-button
+                as="a"
                 href="{{ cp_route('justbetter.detours.actions.export') }}"
                 variant="primary"
                 text="{{ __('Download CSV') }}"

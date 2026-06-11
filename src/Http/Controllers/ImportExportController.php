@@ -22,7 +22,7 @@ class ImportExportController
     {
         $file = $contract->export();
 
-        return response()->download($file);
+        return response()->download($file, 'detours-'.now()->format('Y-m-d').'.csv');
     }
 
     public function import(ImportRequest $request): RedirectResponse
