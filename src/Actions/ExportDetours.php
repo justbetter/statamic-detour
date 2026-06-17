@@ -27,9 +27,14 @@ class ExportDetours implements ExportsDetours
 
         $detours = $detours->map(function (Detour $detour): array {
             $detour = $detour->toArray();
-            /** @var array<int, string> $sites */
-            $sites = $detour['sites'] ?? [];
-            $detour['sites'] = isset($detour['sites']) ? implode(';', $sites) : null;
+            /** @var array<int, string>|string|null $rawSites */
+            $rawSites = $detour['sites'] ?? [];
+            $sites = match (true) {
+                is_array($rawSites) => $rawSites,
+                is_string($rawSites) && $rawSites !== '' => explode(';', $rawSites),
+                default => [],
+            };
+            $detour['sites'] = $sites === [] ? null : implode(';', $sites);
 
             return $detour;
         });

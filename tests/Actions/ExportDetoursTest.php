@@ -36,4 +36,25 @@ class ExportDetoursTest extends TestCase
 
         Storage::disk($disk)->assertExists('export.csv');
     }
+
+    #[Test]
+    public function it_can_export_detours_with_string_sites(): void
+    {
+        $action = app(ExportsDetours::class);
+        $repository = app(ResolvesRepository::class)->resolve();
+        $disk = config()->string('justbetter.statamic-detour.actions.disk');
+        Storage::fake($disk);
+
+        $repository->store(Form::make([
+            'from' => '/from',
+            'to' => '/to',
+            'code' => '301',
+            'sites' => '',
+            'type' => Type::Path,
+        ]));
+
+        $action->export();
+
+        Storage::disk($disk)->assertExists('export.csv');
+    }
 }
