@@ -8,7 +8,7 @@ This Statamic addon provides a flexible redirect management system for your Stat
 ## Requirements
 
 * PHP ^8.3
-* Laravel ^12.0
+* Laravel ^12.40|^13.0
 * Statamic ^6.3
 
 ## Features

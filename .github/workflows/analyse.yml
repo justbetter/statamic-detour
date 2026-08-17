@@ -10,7 +10,12 @@ jobs:
             fail-fast: true
             matrix:
                 php: [8.4, 8.5]
-                laravel: [13.*]
+                laravel: [12.*, 13.*]
+                include:
+                    - laravel: 12.*
+                      testbench: 10.*
+                    - laravel: 13.*
+                      testbench: 11.*
 
         name: P${{ matrix.php }} - L${{ matrix.laravel }}
 
@@ -27,8 +32,8 @@ jobs:
 
             -   name: Install dependencies
                 run: |
-                    composer require "laravel/framework:${{ matrix.laravel }}" --no-interaction --no-update
-                    composer install
+                    composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+                    composer update --prefer-dist --no-interaction
 
             -   name: Analyse
                 run: composer analyse
