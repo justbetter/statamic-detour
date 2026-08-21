@@ -16,7 +16,21 @@ class DetourController
 {
     public function index(IndexRequest $request, ListsDetours $contract): mixed
     {
-        $data = $contract->list($request->size ?? 15, Paginator::resolveCurrentPage());
+        $data = $contract->list($request->size ?? 15, Paginator::resolveCurrentPage(), $request->search);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'items' => $data['data'],
+                'paginatorMeta' => [
+                    'current_page' => $data['paginator']->currentPage(),
+                    'last_page' => $data['paginator']->lastPage(),
+                    'total' => $data['paginator']->total(),
+                    'from' => $data['paginator']->firstItem(),
+                    'to' => $data['paginator']->lastItem(),
+                ],
+                'perPage' => $data['paginator']->perPage(),
+            ]);
+        }
 
         /** @var view-string $view */
         $view = 'statamic-detour::detours.index';

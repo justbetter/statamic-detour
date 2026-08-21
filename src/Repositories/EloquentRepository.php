@@ -20,7 +20,21 @@ class EloquentRepository extends BaseRepository
 
     public function paginate(Paginate $paginate): LengthAwarePaginator
     {
-        return DetourModel::query()
+        $query = DetourModel::query();
+
+        if ($paginate->search) {
+            $search = '%'.$paginate->search.'%';
+
+            $query->where(function ($query) use ($search): void {
+                $query
+                    ->where('from', 'like', $search)
+                    ->orWhere('to', 'like', $search)
+                    ->orWhere('code', 'like', $search)
+                    ->orWhere('type', 'like', $search);
+            });
+        }
+
+        return $query
             ->paginate($paginate->size, page: $paginate->page)
             ->through(fn (DetourModel $model): Detour => Detour::make($model->toArray()));
     }

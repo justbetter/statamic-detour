@@ -7,6 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * @property int|null $size
+ * @property string|null $search
  */
 class IndexRequest extends FormRequest
 {
@@ -17,6 +18,7 @@ class IndexRequest extends FormRequest
     {
         return [
             'size' => 'sometimes|integer|min:1|max:100',
+            'search' => 'sometimes|nullable|string',
         ];
     }
 }
