@@ -36,6 +36,19 @@ class FileRepository extends BaseRepository
 
         $collection = $this->get()->values();
 
+        if ($paginate->search) {
+            $search = str($paginate->search)->lower()->toString();
+
+            $collection = $collection
+                ->filter(fn (Detour $detour): bool => collect([
+                    $detour->from,
+                    $detour->to,
+                    $detour->code,
+                    $detour->type,
+                ])->contains(fn (mixed $value): bool => str((string) $value)->lower()->contains($search)))
+                ->values();
+        }
+
         $total = $collection->count();
         $perPage = $paginate->size;
 

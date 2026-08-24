@@ -157,6 +157,38 @@ class EloquentDetourRepositoryTest extends TestCase
     }
 
     #[Test]
+    public function it_can_paginate_search_results(): void
+    {
+        DetourModel::create([
+            'from' => '/old-page',
+            'to' => '/new-page',
+            'code' => '302',
+            'type' => Type::Path,
+        ]);
+
+        DetourModel::create([
+            'from' => '/campaign-source',
+            'to' => '/campaign-target',
+            'code' => '301',
+            'type' => Type::Path,
+        ]);
+
+        $contract = app(ResolveRepository::class);
+        $repository = $contract->resolve();
+
+        $paginate = Paginate::make([
+            'size' => 15,
+            'page' => 1,
+            'search' => 'campaign',
+        ]);
+
+        $results = $repository->paginate($paginate);
+
+        $this->assertSame(1, $results->count());
+        $this->assertSame('/campaign-source', $results->first()?->from);
+    }
+
+    #[Test]
     public function it_can_be_updated(): void
     {
         $contract = app(ResolveRepository::class);

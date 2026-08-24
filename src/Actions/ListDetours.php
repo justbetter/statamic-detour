@@ -13,14 +13,14 @@ class ListDetours implements ListsDetours
         protected ResolvesRepository $resolvesRepository
     ) {}
 
-    public function list(int $size, int $page): array
+    public function list(int $size, int $page, ?string $search = null): array
     {
         $repository = $this->resolvesRepository->resolve();
 
         // @phpstan-ignore-next-line
         $oldDirectory = Blueprint::directory();
 
-        $paginate = Paginate::make(['size' => $size,  'page' => $page])->validate();
+        $paginate = Paginate::make(['size' => $size,  'page' => $page, 'search' => $search])->validate();
 
         $paginator = $repository->paginate($paginate);
 

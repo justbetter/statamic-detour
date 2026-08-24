@@ -7,6 +7,21 @@
             :values="values"
             @saved="addItem"
         />
+        <form class="my-6 flex gap-2" @submit.prevent="submitSearch">
+            <Input
+                v-model="searchQuery"
+                type="search"
+                :placeholder="__('Search detours')"
+            />
+            <Button type="submit" variant="primary" :text="__('Search')" />
+            <Button
+                v-if="searchQuery"
+                type="button"
+                variant="ghost"
+                :text="__('Clear')"
+                @click="clearSearch"
+            />
+        </form>
         <Card>
             <Table class="mt-6 min-w-full">
                 <TableRow>
@@ -53,10 +68,10 @@
                 </TableRow>
             </Table>
         </Card>
-        <div v-if="paginatorMeta" class="mt-4">
+        <div v-if="resourceMeta" class="mt-4">
             <Pagination
-                :resource-meta="paginatorMeta"
-                :per-page="perPage"
+                :resource-meta="resourceMeta"
+                :per-page="currentPerPage"
                 @page-selected="selectPage"
                 @per-page-changed="selectPerPage"
             />
@@ -73,6 +88,7 @@ import {
     Button,
     Badge,
     Card,
+    Input,
     Pagination,
 } from '@statamic/cms/ui';
 
@@ -85,6 +101,7 @@ const {
     paginatorMeta,
     perPage,
     indexUrl,
+    search,
 } = defineProps({
     action: {
         type: String,
@@ -122,9 +139,16 @@ const {
         type: String,
         default: '',
     },
+    search: {
+        type: String,
+        default: '',
+    },
 });
 
 const detours = ref([]);
+const searchQuery = ref(search ?? '');
+const resourceMeta = ref(paginatorMeta);
+const currentPerPage = ref(perPage);
 const app = getCurrentInstance();
 const axiosClient = app?.appContext.config.globalProperties.$axios;
 
@@ -136,15 +160,46 @@ const buildPaginatedUrl = (page, size) => {
     const url = new URL(indexUrl, window.location.origin);
     url.searchParams.set('size', size);
     url.searchParams.set('page', page);
+
+    if (searchQuery.value.trim()) {
+        url.searchParams.set('search', searchQuery.value.trim());
+    } else {
+        url.searchParams.delete('search');
+    }
+
     return url.toString();
 };
 
+const fetchDetours = (page, size) => {
+    const url = buildPaginatedUrl(page, size);
+
+    axiosClient.get(url, {
+        headers: {
+            Accept: 'application/json',
+        },
+    }).then((response) => {
+        detours.value = response.data.items;
+        resourceMeta.value = response.data.paginatorMeta;
+        currentPerPage.value = response.data.perPage;
+        window.history.pushState({}, '', url);
+    });
+};
+
+const submitSearch = () => {
+    fetchDetours(1, currentPerPage.value);
+};
+
+const clearSearch = () => {
+    searchQuery.value = '';
+    submitSearch();
+};
+
 const selectPage = (page) => {
-    window.location.href = buildPaginatedUrl(page, perPage);
+    fetchDetours(page, currentPerPage.value);
 };
 
 const selectPerPage = (size) => {
-    window.location.href = buildPaginatedUrl(1, size);
+    fetchDetours(1, size);
 };
 
 const addItem = (data) => {

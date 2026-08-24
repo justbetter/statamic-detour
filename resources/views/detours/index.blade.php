@@ -22,6 +22,7 @@
             :paginator-meta='@json($paginatorMeta)'
             :per-page="{{ $paginator->perPage() }}"
             index-url="{{ request()->url() }}"
+            search="{{ request('search') }}"
         ></Detours>
     </div>
 @endsection

@@ -33,6 +33,45 @@ class DetourControllerTest extends TestCase
     }
 
     #[Test]
+    public function it_can_return_search_results_as_json(): void
+    {
+        /** @var \Statamic\Auth\File\User $user */
+        $user = User::make();
+        $user->id('test-user')->email('test@example.com')->makeSuper();
+
+        $this->actingAs($user);
+
+        $contract = app(ResolveRepository::class);
+        $repository = $contract->resolve();
+
+        $repository->store(Form::make([
+            'from' => '/old-page',
+            'to' => '/new-page',
+            'code' => '302',
+            'type' => 'path',
+            'sites' => [],
+        ]));
+
+        $repository->store(Form::make([
+            'from' => '/campaign-source',
+            'to' => '/campaign-target',
+            'code' => '301',
+            'type' => 'path',
+            'sites' => [],
+        ]));
+
+        $response = $this
+            ->withoutMiddleware()
+            ->getJson(cp_route('justbetter.detours.index', ['search' => 'campaign']));
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('items.0.from', '/campaign-source')
+            ->assertJsonPath('paginatorMeta.total', 1)
+            ->assertJsonPath('perPage', 15);
+    }
+
+    #[Test]
     public function it_can_store_data(): void
     {
         $response = $this->withoutMiddleware()->postJson(cp_route('justbetter.detours.store'), [
