@@ -2,13 +2,9 @@
 
 namespace JustBetter\Detour\Actions;
 
+use JustBetter\Detour\Contracts\CreatesAutoDetour;
 use JustBetter\Detour\Contracts\CreatesDetoursFromEntry;
-use JustBetter\Detour\Contracts\DeletesDetour;
-use JustBetter\Detour\Contracts\FindsDetour;
 use JustBetter\Detour\Contracts\GetsOldEntryUri;
-use JustBetter\Detour\Contracts\StoresDetour;
-use JustBetter\Detour\Data\Form;
-use JustBetter\Detour\Enums\Type;
 use JustBetter\Detour\Utils\EntryHelper;
 use Statamic\Entries\Entry;
 use Statamic\Facades\Entry as EntryFacade;
@@ -16,10 +12,8 @@ use Statamic\Facades\Entry as EntryFacade;
 class CreateDetoursFromEntry implements CreatesDetoursFromEntry
 {
     public function __construct(
-        protected FindsDetour $findContract,
-        protected StoresDetour $storeContract,
-        protected DeletesDetour $deleteContract,
         protected GetsOldEntryUri $getOldEntryUriContract,
+        protected CreatesAutoDetour $createAutoDetourContract,
     ) {}
 
     public function create(Entry $entry): void
@@ -59,22 +53,11 @@ class CreateDetoursFromEntry implements CreatesDetoursFromEntry
             $oldUri = $this->getOldEntryUriContract->get($entry);
         }
 
-        if (! $oldUri || $entry->uri() === $oldUri) {
+        if (! $oldUri) {
             return;
         }
 
-        if ($conflictingDetour = $this->findContract->firstWhere('from', $entry->uri())) {
-            $this->deleteContract->delete($conflictingDetour->id);
-        }
-
-        $data = Form::make([
-            'from' => $oldUri,
-            'to' => $entry->uri(),
-            'code' => '301',
-            'type' => Type::Path->value,
-        ]);
-
-        $this->storeContract->store($data);
+        $this->createAutoDetourContract->create($oldUri, $entry->uri());
     }
 
     public static function bind(): void
