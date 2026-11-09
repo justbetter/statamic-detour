@@ -37,11 +37,7 @@ class CreateAutoDetour implements CreatesAutoDetour
             return;
         }
 
-        // The new URI is live now, so a detour away from it would shadow the page.
-        // This also removes detours that repointing would turn into a loop.
         $this->deleteWhere('from', $to, $siteInstance);
-
-        // A single detour per source URI; the latest move wins.
         $this->deleteWhere('from', $from, $siteInstance);
 
         $this->repointChains($from, $to, $siteInstance);
@@ -55,7 +51,6 @@ class CreateAutoDetour implements CreatesAutoDetour
         ]));
     }
 
-    // Entry uris are relative to their site, requests include the site's url prefix (e.g. /de).
     protected function path(Site $site, string $uri): string
     {
         return URL::makeRelative(URL::tidy($site->absoluteUrl().'/'.$uri));
@@ -78,12 +73,7 @@ class CreateAutoDetour implements CreatesAutoDetour
             ->each(fn (Detour $detour) => $this->deleteContract->delete($detour->id));
     }
 
-    /**
-     * On multisite only detours scoped to exactly this site are touched, so
-     * shared or global detours that also apply to other sites stay intact.
-     *
-     * @return Enumerable<array-key, Detour>
-     */
+    /** @return Enumerable<array-key, Detour> */
     protected function ownedDetours(string $field, string $value, Site $site): Enumerable
     {
         return $this->findContract
