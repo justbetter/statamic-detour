@@ -27,11 +27,7 @@ class CreateAutoDetour implements CreatesAutoDetour
             return;
         }
 
-        // The new URI is live now, so a detour away from it would shadow the page.
-        // This also removes detours that repointing would turn into a loop.
         $this->deleteWhere('from', $to);
-
-        // A single detour per source URI; the latest move wins.
         $this->deleteWhere('from', $from);
 
         $this->repointChains($from, $to);

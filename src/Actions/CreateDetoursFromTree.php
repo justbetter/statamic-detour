@@ -20,8 +20,7 @@ class CreateDetoursFromTree implements CreatesDetoursFromTree
         protected CreatesAutoDetour $createAutoDetourContract,
     ) {}
 
-    // Runs while saving: the Stache syncs the tree's original state as soon as
-    // it is fetched again, so the old uris are only reliable before the save.
+    // The Stache resets the tree's original state once it is fetched again, so old uris are only known before saving.
     public function prepare(CollectionTree $tree): void
     {
         unset($this->pending[$this->key($tree)]);
@@ -93,8 +92,7 @@ class CreateDetoursFromTree implements CreatesDetoursFromTree
         return $uris;
     }
 
-    // Page::uri() writes to these caches even with the uri cache disabled,
-    // so computing the old uris would otherwise leak them into the request.
+    // Page::uri() writes to these caches even with the uri cache disabled.
     protected function flushUriCaches(): void
     {
         foreach (['structure-uris', 'entry-uris'] as $name) {
