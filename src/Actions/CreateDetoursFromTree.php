@@ -65,7 +65,7 @@ class CreateDetoursFromTree implements CreatesDetoursFromTree
         unset($this->pending[$key]);
 
         foreach ($uris as $oldUri => $newUri) {
-            $this->createAutoDetourContract->create($oldUri, $newUri);
+            $this->createAutoDetourContract->create($oldUri, $newUri, $tree->locale());
         }
     }
 

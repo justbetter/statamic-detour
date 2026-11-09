@@ -125,6 +125,8 @@ Redirects are also created when you restructure a structured collection, for exa
 
 Existing redirects that point to a URL that is redirected again are updated to point straight to the new URL, so you don't end up with redirect chains.
 
+On multisite, automatic redirects are limited to the site of the entry and include the site's URL prefix (for example `/de/old-page`). Only redirects limited to that same site are updated or replaced. Redirects shared between sites or applying to all sites are left untouched.
+
 ```php
 return [
     'auto_create' => true,
