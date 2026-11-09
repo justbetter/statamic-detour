@@ -31,7 +31,6 @@ class ServiceProvider extends AddonServiceProvider
         'cp' => __DIR__.'/../routes/cp.php',
     ];
 
-    /** @phpstan-ignore-next-line */
     protected $vite = [
         'input' => [
             'resources/css/cp.css',
