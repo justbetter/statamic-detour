@@ -20,6 +20,14 @@ abstract class BaseRepository
 
     abstract public function firstWhere(string $field, mixed $value): ?Detour;
 
+    /** @return Enumerable<array-key, Detour> */
+    public function where(string $field, mixed $value): Enumerable
+    {
+        return $this->get()
+            ->filter(fn (Detour $detour): bool => $detour->get($field) === $value)
+            ->values();
+    }
+
     abstract public function store(Form $form): Detour;
 
     abstract public function update(string $id, Form $form): Detour;
