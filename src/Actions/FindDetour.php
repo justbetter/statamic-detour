@@ -2,6 +2,7 @@
 
 namespace JustBetter\Detour\Actions;
 
+use Illuminate\Support\Enumerable;
 use JustBetter\Detour\Contracts\FindsDetour;
 use JustBetter\Detour\Contracts\ResolvesRepository;
 use JustBetter\Detour\Data\Detour;
@@ -17,6 +18,13 @@ class FindDetour implements FindsDetour
         $repository = $this->resolvesRepository->resolve();
 
         return $repository->firstWhere($field, $value);
+    }
+
+    public function where(string $field, mixed $value): Enumerable
+    {
+        $repository = $this->resolvesRepository->resolve();
+
+        return $repository->where($field, $value);
     }
 
     public static function bind(): void

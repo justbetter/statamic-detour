@@ -3,7 +3,9 @@
 namespace JustBetter\Detour;
 
 use Illuminate\Routing\Router;
+use JustBetter\Detour\Actions\CreateAutoDetour;
 use JustBetter\Detour\Actions\CreateDetoursFromEntry;
+use JustBetter\Detour\Actions\CreateDetoursFromTree;
 use JustBetter\Detour\Actions\DeleteDetour;
 use JustBetter\Detour\Actions\ExportDetours;
 use JustBetter\Detour\Actions\FindDetour;
@@ -29,7 +31,6 @@ class ServiceProvider extends AddonServiceProvider
         'cp' => __DIR__.'/../routes/cp.php',
     ];
 
-    /** @phpstan-ignore-next-line */
     protected $vite = [
         'input' => [
             'resources/css/cp.css',
@@ -67,7 +68,9 @@ class ServiceProvider extends AddonServiceProvider
         ImportDetours::bind();
         ImportDetour::bind();
         FindDetour::bind();
+        CreateAutoDetour::bind();
         CreateDetoursFromEntry::bind();
+        CreateDetoursFromTree::bind();
         GetOldEntryUri::bind();
 
         FileRepository::bind();

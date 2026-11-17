@@ -53,6 +53,14 @@ class EloquentRepository extends BaseRepository
         return $model ? Detour::make($model->toArray()) : null;
     }
 
+    public function where(string $field, mixed $value): Enumerable
+    {
+        return DetourModel::query()
+            ->where($field, '=', $value)
+            ->get()
+            ->map(fn (DetourModel $model): Detour => Detour::make($model->toArray()));
+    }
+
     public function store(Form $form): Detour
     {
         $data = $form->toArray();
