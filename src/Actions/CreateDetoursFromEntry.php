@@ -57,7 +57,7 @@ class CreateDetoursFromEntry implements CreatesDetoursFromEntry
             return;
         }
 
-        $this->createAutoDetourContract->create($oldUri, $entry->uri());
+        $this->createAutoDetourContract->create($oldUri, $entry->uri(), $entry->locale());
     }
 
     public static function bind(): void

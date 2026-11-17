@@ -4,5 +4,5 @@ namespace JustBetter\Detour\Contracts;
 
 interface CreatesAutoDetour
 {
-    public function create(string $from, string $to): void;
+    public function create(string $fromUri, string $toUri, string $site): void;
 }

@@ -48,7 +48,7 @@ class CreateAutoDetourTest extends TestCase
     {
         config()->set('justbetter.statamic-detour.driver', $driver);
 
-        app(CreatesAutoDetour::class)->create('/old', '/new');
+        app(CreatesAutoDetour::class)->create('/old', '/new', 'default');
 
         $detours = $this->detours();
 
@@ -64,7 +64,7 @@ class CreateAutoDetourTest extends TestCase
     {
         config()->set('justbetter.statamic-detour.driver', $driver);
 
-        app(CreatesAutoDetour::class)->create('/same', '/same');
+        app(CreatesAutoDetour::class)->create('/same', '/same', 'default');
 
         $this->assertCount(0, $this->detours());
     }
@@ -77,7 +77,7 @@ class CreateAutoDetourTest extends TestCase
 
         $existing = $this->storeDetour('/first', '/old');
 
-        app(CreatesAutoDetour::class)->create('/old', '/new');
+        app(CreatesAutoDetour::class)->create('/old', '/new', 'default');
 
         $detours = $this->detours();
 
@@ -97,7 +97,7 @@ class CreateAutoDetourTest extends TestCase
 
         $this->storeDetour('/new', '/old');
 
-        app(CreatesAutoDetour::class)->create('/old', '/new');
+        app(CreatesAutoDetour::class)->create('/old', '/new', 'default');
 
         $detours = $this->detours();
 
@@ -114,7 +114,7 @@ class CreateAutoDetourTest extends TestCase
 
         $this->storeDetour('/old', '/elsewhere');
 
-        app(CreatesAutoDetour::class)->create('/old', '/new');
+        app(CreatesAutoDetour::class)->create('/old', '/new', 'default');
 
         $detours = $this->detours();
 
@@ -130,7 +130,7 @@ class CreateAutoDetourTest extends TestCase
 
         $this->storeDetour('#^/new$#', '/old', Type::Regex);
 
-        app(CreatesAutoDetour::class)->create('/old', '/new');
+        app(CreatesAutoDetour::class)->create('/old', '/new', 'default');
 
         $detours = $this->detours();
 
